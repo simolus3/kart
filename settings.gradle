@@ -1,0 +1,5 @@
+rootProject.name = 'kart'
+
+include ':integration_tests'
+include ':kernel'
+include ':kotlin2kernel'

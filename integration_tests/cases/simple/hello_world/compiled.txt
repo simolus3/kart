@@ -1,0 +1,7 @@
+main = foo::main;
+library from "foo" as foo {
+
+  method main() → void {
+    core::print("Hello world");
+  }
+}

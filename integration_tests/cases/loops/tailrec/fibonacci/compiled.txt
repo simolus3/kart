@@ -1,0 +1,36 @@
+main = fib::main;
+library from "fibonacci" as fib {
+
+  method fibonacci(final core::int n, final core::int a, final core::int b) → core::int {
+    core::int n = n;
+    core::int a = a;
+    core::int b = b;
+    #L1:
+    while (true)
+      #L2:
+      {
+        final core::int n = n;
+        final core::int a = a;
+        final core::int b = b;
+        return block {
+          final core::int tmp0_subject = n;
+        } =>tmp0_subject.{core::Object::==}(0) ? a : tmp0_subject.{core::Object::==}(1) ? b : block {
+          n = n.{core::int::-}(1);
+          a = b;
+          b = a.{core::int::+}(b);
+        } => block {
+          break #L2;
+        } =>invalid-expression "Should not get here";
+        break #L1;
+      }
+  }
+  method fibonacci$default(final core::int n, final core::int a, final core::int b, final core::int $mask0) → core::int {
+    final core::int n = n;
+    final core::int a = !$mask0.{core::int::&}(2).{core::Object::==}(0) ? 0 : a;
+    final core::int b = !$mask0.{core::int::&}(4).{core::Object::==}(0) ? 1 : b;
+    return fib::fibonacci(n, a, b);
+  }
+  method main() → void {
+    core::print();
+  }
+}

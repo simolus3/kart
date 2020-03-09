@@ -1,0 +1,30 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+
+    implementation project(':kernel')
+    implementation project(':kotlin2kernel')
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "13"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "13"
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+task generateTextDescription(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'IntegrationTestKt'
+    args('generate-outputs', properties.get('kart.stdlib_jar'))
+}
