@@ -6,6 +6,7 @@ environment:
   sdk: '>=2.7.0 <3.0.0'
 
 dependencies:
+  path: ^1.6.4
   kernel: ^0.3.29
   front_end: any # kernel depends on front_end without declaring a dependency in its pubspec
 

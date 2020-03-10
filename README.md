@@ -31,6 +31,16 @@ Create a folder called `example` in this directory, then run `Main.kt` in `kotli
 the stdlib location from the setup step as parameter. This will compile all Kotlin sources in
 `example` into `output.dill`, which can then be run in Dart.
 
+#### dart2js
+
+Note: At the moment our Kernel files crash dart2js for reasons I don't understand.
+
+To further compile a Kernel file to JavaScript with `dart2js`, a matching Dart platform needs to 
+be linked. To do that, run `dart kart_support/tool/link_stdlib.dart <file> js`. If you want to
+run the generated file in node, use `js-server` instead of `js` in the end.
+
+Finally, run `dart2js <file_linked.dill>`.
+
 ### Viewing generated Dart
 
 To view a generated `.dill` file in text form, you can run 
