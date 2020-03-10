@@ -38,6 +38,8 @@ object Tags {
     const val DO_STATEMENT = 68u
     const val IF_STATEMENT = 73u
     const val RETURN_STATEMENT = 74u
+    const val TRY_CATCH = 75u
+    const val TRY_FINALLY = 76u
 
     const val VARIABLE_DECLARATION = 78u
 

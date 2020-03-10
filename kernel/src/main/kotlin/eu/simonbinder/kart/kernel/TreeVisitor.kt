@@ -8,6 +8,7 @@ import eu.simonbinder.kart.kernel.members.Component
 import eu.simonbinder.kart.kernel.members.Library
 import eu.simonbinder.kart.kernel.members.Member
 import eu.simonbinder.kart.kernel.members.MemberVisitor
+import eu.simonbinder.kart.kernel.statements.Catch
 import eu.simonbinder.kart.kernel.statements.Statement
 import eu.simonbinder.kart.kernel.statements.StatementVisitor
 import eu.simonbinder.kart.kernel.types.TypeParameter
@@ -24,6 +25,7 @@ interface TreeVisitor<R> :
     override fun defaultMember(node: Member): R = defaultTreeNode(node)
 
     fun visitArguments(node: Arguments): R = defaultTreeNode(node)
+    fun visitCatch(node: Catch): R = defaultTreeNode(node)
     fun visitComponent(node: Component): R = defaultTreeNode(node)
     fun visitFunctionNode(node: FunctionNode): R = defaultTreeNode(node)
     fun visitLibrary(node: Library): R = defaultTreeNode(node)

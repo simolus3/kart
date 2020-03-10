@@ -91,10 +91,33 @@ object BodyCompiler : IrElementVisitor<Statement, InBodyCompilationContext> {
         return ReturnStatement(compileExpression(expression.value, data)).withIrOffsets(expression)
     }
 
+    override fun visitTry(aTry: IrTry, data: InBodyCompilationContext): Statement {
+        var stmt: Statement = TryCatch(
+            body = aTry.accept(this, data),
+            catches = aTry.catches.map { irCatch ->
+                val dartType = data.info.dartTypeFor(irCatch.catchParameter.type)
+                Catch(
+                    guard = dartType,
+                    body = irCatch.result.accept(this, data),
+                    exception = VariableDeclaration(
+                        name = irCatch.catchParameter.name.identifier,
+                        type = dartType
+                    ).also { it.isFinal = true }
+                )
+            }
+        )
+
+        aTry.finallyExpression?.let { irFinally ->
+            stmt = TryFinally(stmt, irFinally.accept(this, data))
+        }
+
+        return stmt
+    }
+
     override fun visitVariable(declaration: IrVariable, data: InBodyCompilationContext): Statement {
         val kernelDeclaration = VariableDeclaration(
             name = declaration.name.identifier,
-            type = data.info.dartIntrinsics.intrinsicType(declaration.type),
+            type = data.info.dartTypeFor(declaration.type),
             initializer = declaration.initializer?.let {
                 compileExpression(it, data)
             }

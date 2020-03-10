@@ -17,6 +17,8 @@ interface StatementVisitor<R> {
     fun visitDoWhile(node: DoStatement): R = defaultStatement(node)
 
     // Control flow
+    fun visitTryCatch(node: TryCatch): R = defaultStatement(node)
+    fun visitTryFinally(node: TryFinally): R = defaultStatement(node)
     fun visitReturn(node: ReturnStatement): R = defaultStatement(node)
     fun visitBreak(node: BreakStatement): R = defaultStatement(node)
 }

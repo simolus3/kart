@@ -3,6 +3,7 @@ package eu.simonbinder.kart.transformer
 import eu.simonbinder.kart.kernel.Source
 import eu.simonbinder.kart.kernel.Uri
 import eu.simonbinder.kart.kernel.members.Component
+import eu.simonbinder.kart.kernel.types.DartType
 import eu.simonbinder.kart.kotlin.DartBackendContext
 import eu.simonbinder.kart.transformer.invoke.DartIntrinsics
 import eu.simonbinder.kart.transformer.metadata.MetadataRepository
@@ -11,6 +12,7 @@ import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.path
 import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
 import org.jetbrains.kotlin.ir.symbols.IrFileSymbol
+import org.jetbrains.kotlin.ir.types.IrType
 import java.io.File
 
 class CompilationInfo(
@@ -33,5 +35,9 @@ class CompilationInfo(
         val uri = Uri.file(file.path)
         visitedFiles[symbol] = Source(content, importUri = null, fileUri = uri)
         return uri
+    }
+
+    fun dartTypeFor(irType: IrType): DartType {
+        return dartIntrinsics.intrinsicType(irType)
     }
 }

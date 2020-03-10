@@ -577,6 +577,36 @@ class KernelSerializer(
         writeOption(node.expression, this::writeExpression)
     }
 
+    override fun visitTryCatch(node: TryCatch) {
+        node.computeNeedsStackTrace()
+
+        writeByte(Tags.TRY_CATCH)
+        writeStatement(node.body)
+        writeByte(node.flags.toUInt())
+        writeList(node.catches, this::writeCatch)
+    }
+
+    private fun writeCatch(node: Catch) {
+        node.accept(this)
+    }
+
+    override fun visitCatch(node: Catch) {
+        // Note: There is no tag on catch
+        scoped(variableScope = true) {
+            writeFileOffset(node.fileOffset)
+            writeType(node.guard)
+            writeOption(node.exception, this::writeVariableDeclarationNoTag)
+            writeOption(node.stackTrace, this::writeVariableDeclarationNoTag)
+            writeStatement(node.body)
+        }
+    }
+
+    override fun visitTryFinally(node: TryFinally) {
+        writeByte(Tags.TRY_FINALLY)
+        writeStatement(node.body)
+        writeStatement(node.finalizer)
+    }
+
     override fun visitVariableDeclaration(node: VariableDeclaration) {
         writeByte(Tags.VARIABLE_DECLARATION)
         writeVariableDeclarationNoTag(node)
