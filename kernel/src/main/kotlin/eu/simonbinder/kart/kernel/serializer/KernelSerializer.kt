@@ -125,7 +125,7 @@ class KernelSerializer(
     }
 
     private fun writeFileOffset(value: Int) {
-        writeByte((value + 1).toUInt())
+        writeUint((value + 1).toUInt())
     }
 
     private inline fun <T> writeList(list: Collection<T>, writer: (T) -> Unit) {
@@ -343,8 +343,8 @@ class KernelSerializer(
         writeByte(Tags.FUNCTION_NODE)
         enterScope(variableScope = true)
 
-        writeFileOffset(-1) // file offset
-        writeFileOffset(-1) // end offset
+        writeFileOffset(node.fileOffset)
+        writeFileOffset(node.endOffset)
 
         writeByte(node.asyncMarker.ordinal.toUInt()) // async marker
         writeByte(node.asyncMarker.ordinal.toUInt()) // dart async marker
@@ -452,13 +452,13 @@ class KernelSerializer(
 
     override fun visitInvalidExpression(node: InvalidExpression) {
         writeByte(Tags.INVALID_EXPRESSION)
-        writeFileOffset(-1)
+        writeFileOffset(node.fileOffset)
         writeStringReference(node.message)
     }
 
     override fun visitStringConcatenation(node: StringConcatenation) {
         writeByte(Tags.STRING_CONCATENATION)
-        writeFileOffset(-1)
+        writeFileOffset(node.fileOffset)
         writeList(node.expressions, this::writeExpression)
     }
 
@@ -469,11 +469,11 @@ class KernelSerializer(
         if (index < 8u && node.promotedType == null) {
             // We can write a specialized variable get
             writeByte(Tags.SPECIALIZED_VARIABLE_GET + index)
-            writeFileOffset(-1)
+            writeFileOffset(node.fileOffset)
             writeUint(declarationPosition)
         } else {
             writeByte(Tags.VARIABLE_GET)
-            writeFileOffset(-1)
+            writeFileOffset(node.fileOffset)
             writeUint(declarationPosition)
             writeUint(index)
             writeOption(node.promotedType, this::writeType)
@@ -487,11 +487,11 @@ class KernelSerializer(
         if (index < 8u) {
             // use a specialized set
             writeByte(Tags.SPECIALIZED_VARIABLE_SET + index)
-            writeFileOffset(-1)
+            writeFileOffset(node.fileOffset)
             writeUint(declarationPosition)
         } else {
             writeByte(Tags.VARIABLE_SET)
-            writeFileOffset(-1)
+            writeFileOffset(node.fileOffset)
             writeUint(declarationPosition)
             writeUint(index)
         }
@@ -500,14 +500,14 @@ class KernelSerializer(
 
     override fun visitStaticInvocation(node: StaticInvocation) {
         writeByte(Tags.STATIC_INVOCATION)
-        writeFileOffset(-1)
+        writeFileOffset(node.fileOffset)
         writeReference(node.reference)
         writeArguments(node.arguments)
     }
 
     override fun visitMethodInvocation(node: MethodInvocation) {
         writeByte(Tags.METHOD_INVOCATION)
-        writeFileOffset(-1)
+        writeFileOffset(node.fileOffset)
         writeExpression(node.receiver)
         writeName(node.name)
         writeArguments(node.arguments)
@@ -541,7 +541,7 @@ class KernelSerializer(
 
     override fun visitBreak(node: BreakStatement) {
         writeByte(Tags.BREAK_STATEMENT)
-        writeFileOffset(-1)
+        writeFileOffset(node.fileOffset)
         writeUint(labelIndex!![node.to!!])
     }
 
@@ -556,7 +556,7 @@ class KernelSerializer(
 
     override fun visitIfStatement(node: IfStatement) {
         writeByte(Tags.IF_STATEMENT)
-        writeFileOffset(-1)
+        writeFileOffset(node.fileOffset)
         writeExpression(node.condition)
         writeStatement(node.then)
         writeStatement(node.otherwise)
@@ -573,7 +573,7 @@ class KernelSerializer(
 
     override fun visitReturn(node: ReturnStatement) {
         writeByte(Tags.RETURN_STATEMENT)
-        writeFileOffset(-1)
+        writeFileOffset(node.fileOffset)
         writeOption(node.expression, this::writeExpression)
     }
 
@@ -584,8 +584,8 @@ class KernelSerializer(
 
     private fun writeVariableDeclarationNoTag(node: VariableDeclaration) {
         relevantNodeOffsets[node] = currentOffset
-        writeFileOffset(-1) // file offset
-        writeFileOffset(-1) // equals offset
+        writeFileOffset(node.fileOffset)
+        writeFileOffset(node.fileEqualsOffset)
         writeUint(0u) // annotations
         writeByte(node.flags.toUInt())
         writeStringReference(node.name ?: "")
@@ -597,14 +597,14 @@ class KernelSerializer(
 
     override fun visitDoWhile(node: DoStatement) {
         writeByte(Tags.DO_STATEMENT)
-        writeFileOffset(-1)
+        writeFileOffset(node.fileOffset)
         writeStatement(node.body)
         writeExpression(node.condition)
     }
 
     override fun visitWhile(node: WhileStatement) {
         writeByte(Tags.WHILE_STATEMENT)
-        writeFileOffset(-1)
+        writeFileOffset(node.fileOffset)
         writeExpression(node.condition)
         writeStatement(node.body)
     }

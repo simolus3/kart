@@ -25,6 +25,8 @@ class FunctionNode(
     body: Statement?
 ) : TreeNode() {
 
+    var endOffset: Int = NO_OFFSET
+
     val typeParameters = children(typeParameters)
     val positionalParameters = children(positionalParameters)
     val namedParameters = children(namedParameters)

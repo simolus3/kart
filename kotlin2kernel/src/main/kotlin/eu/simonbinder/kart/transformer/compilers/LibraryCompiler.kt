@@ -43,11 +43,15 @@ object LibraryCompiler : IrElementVisitor<Unit, InLibraryContext> {
                 body = declaration.body!!.accept(BodyCompiler, contextForBody),
                 positionalParameters = parameters,
                 returnType = data.info.dartIntrinsics.intrinsicType(declaration.returnType)
-            ),
+            ).also {
+                it.fileOffset = declaration.startOffset
+                it.endOffset = declaration.endOffset
+            },
             name = Name(declaration.name.identifier),
             reference = dartReference
         )
         procedure.fileUri = data.info.loadFile(declaration.file)
+        procedure.startFileOffset = declaration.startOffset
 
         if (declaration.isMain()) {
             data.info.component.mainMethod = procedure

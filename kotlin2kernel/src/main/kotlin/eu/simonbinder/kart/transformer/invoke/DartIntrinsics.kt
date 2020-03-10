@@ -5,6 +5,7 @@ import eu.simonbinder.kart.kernel.Name as DartName
 import eu.simonbinder.kart.kernel.expressions.*
 import eu.simonbinder.kart.kernel.types.*
 import eu.simonbinder.kart.transformer.names.ImportantDartNames
+import eu.simonbinder.kart.transformer.withIrOffsets
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
 import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
 import org.jetbrains.kotlin.ir.expressions.IrCall
@@ -28,28 +29,6 @@ class DartIntrinsics (
         irBuiltIns.intType,
         irBuiltIns.longType
     )
-
-    private val kotlinLongMinus = irBuiltIns
-        .builtIns
-        .long
-        .unsubstitutedMemberScope
-        .findFirstFunction("minus") {
-            it.valueParameters.single().type == irBuiltIns.builtIns.longType
-        }
-        .irSymbol()
-
-    private val kotlinLongPlus = irBuiltIns
-        .builtIns
-        .long
-        .unsubstitutedMemberScope
-        .findFirstFunction("plus") {
-            it.valueParameters.single().type == irBuiltIns.builtIns.longType
-        }
-        .irSymbol()
-
-    private fun FunctionDescriptor.irSymbol(): IrFunctionSymbol {
-        return symbolTable.referenceSimpleFunction(this)
-    }
 
     fun intrinsicCall(call: IrCall, exprCompiler: (IrExpression) -> Expression): Expression? {
         fun getCompiled(index: Int): Expression {
@@ -116,15 +95,7 @@ class DartIntrinsics (
                 )
             }
             irBuiltIns.booleanNotSymbol -> Not(exprCompiler(call.dispatchReceiver!!))
-            irBuiltIns.checkNotNullSymbol -> NullCheck(getCompiled(0))
-            kotlinLongMinus, kotlinLongPlus -> MethodInvocation(
-                receiver = exprCompiler(call.dispatchReceiver!!),
-                name = DartName(if (symbol == kotlinLongMinus) "-" else "+", null),
-                reference = if (symbol == kotlinLongMinus) dartNames.intMinus else dartNames.intPlus,
-                arguments = Arguments(
-                    positional = listOf(getCompiled(0))
-                )
-            )
+            irBuiltIns.checkNotNullSymbol -> NullCheck(getCompiled(0)).withIrOffsets(call)
             else -> {
                 println("Call not known as intrinsic: ${symbol.descriptor.fqNameSafe}")
                 null

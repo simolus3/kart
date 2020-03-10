@@ -4,6 +4,7 @@ import eu.simonbinder.kart.kernel.Reference
 import eu.simonbinder.kart.kernel.expressions.*
 import eu.simonbinder.kart.transformer.context.InBodyCompilationContext
 import eu.simonbinder.kart.transformer.context.names
+import eu.simonbinder.kart.transformer.withIrOffsets
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.util.getPackageFragment
@@ -53,7 +54,7 @@ object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContex
         var intrinsic = data.info.dartIntrinsics.intrinsicCall(expression) {
             it.accept(this, data)
         }
-        if (intrinsic != null) return intrinsic
+        if (intrinsic != null) return intrinsic.withIrOffsets(expression)
 
         // temporarily implement some more calls as intrinsics
         intrinsic = when (expression.symbol.descriptor.name.identifier) {
@@ -69,38 +70,40 @@ object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContex
             }
             else -> null
         }
-        if (intrinsic != null) return intrinsic
+        if (intrinsic != null) return intrinsic.withIrOffsets(expression)
 
         val dartFunctionReference = data.names.nameFor(expression.symbol.owner)
         return StaticInvocation(dartFunctionReference, Arguments(
             positional = List(expression.valueArgumentsCount) { index ->
                 expression.getValueArgument(index)!!.accept(this, data)
             }
-        ))
+        )).withIrOffsets(expression)
     }
 
     override fun visitErrorExpression(expression: IrErrorExpression, data: InBodyCompilationContext): Expression {
-        return InvalidExpression(expression.description)
+        return InvalidExpression(expression.description).withIrOffsets(expression)
     }
 
     override fun visitGetValue(expression: IrGetValue, data: InBodyCompilationContext): Expression {
         val kernelDeclaration = data.variables[expression.symbol]
             ?: throw IllegalStateException("GetValue $expression referred to an unknown variable")
 
-        return VariableGet(kernelDeclaration)
+        return VariableGet(kernelDeclaration).withIrOffsets(expression)
     }
 
     override fun visitSetVariable(expression: IrSetVariable, data: InBodyCompilationContext): Expression {
         val kernelDeclaration = data.variables[expression.symbol]
             ?: throw IllegalStateException("SetVariable $expression referred to an unknown variable")
 
-        return VariableSet(kernelDeclaration, expression.value.accept(this, data))
+        return VariableSet(kernelDeclaration, expression.value.accept(this, data)).withIrOffsets(expression)
     }
 
     override fun visitStringConcatenation(
         expression: IrStringConcatenation,
         data: InBodyCompilationContext
-    ): Expression = StringConcatenation(expression.arguments.map { it.accept(this, data) })
+    ): Expression {
+        return StringConcatenation(expression.arguments.map { it.accept(this, data) }).withIrOffsets(expression)
+    }
 
     override fun visitWhen(expression: IrWhen, data: InBodyCompilationContext): Expression {
         var root: ConditionalExpression? = null

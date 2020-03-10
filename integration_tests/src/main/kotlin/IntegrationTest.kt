@@ -25,7 +25,7 @@ private fun componentToText(component: Component): String {
     output.close()
 
     val process = ProcessBuilder("dart", "tool/kernel_to_text.dart", outputArray.size.toString())
-        .directory(Paths.get("../kea_support").toFile())
+        .directory(Paths.get("../kart_support").toFile())
         .start()
 
     process.outputStream.write(outputArray)

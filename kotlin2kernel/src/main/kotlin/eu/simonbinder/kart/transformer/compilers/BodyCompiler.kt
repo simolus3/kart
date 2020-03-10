@@ -3,6 +3,7 @@ package eu.simonbinder.kart.transformer.compilers
 import eu.simonbinder.kart.kernel.expressions.Expression
 import eu.simonbinder.kart.kernel.statements.*
 import eu.simonbinder.kart.transformer.context.InBodyCompilationContext
+import eu.simonbinder.kart.transformer.withIrOffsets
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.expressions.*
@@ -55,7 +56,7 @@ object BodyCompiler : IrElementVisitor<Statement, InBodyCompilationContext> {
             }
         }
 
-        val dartLoop =  loopCreator(compileExpression(loop.condition, data), inner)
+        val dartLoop = loopCreator(compileExpression(loop.condition, data), inner).withIrOffsets(loop)
         return if (metadata.hasBreak) {
             metadata.outerLabelForBreak.also {
                 it.body = dartLoop
@@ -68,13 +69,13 @@ object BodyCompiler : IrElementVisitor<Statement, InBodyCompilationContext> {
     override fun visitBreak(jump: IrBreak, data: InBodyCompilationContext): Statement {
         val meta = data.info.meta.metaForLoop(jump.loop)
         meta.hasBreak = true
-        return BreakStatement(meta.outerLabelForBreak)
+        return BreakStatement(meta.outerLabelForBreak).withIrOffsets(jump)
     }
 
     override fun visitContinue(jump: IrContinue, data: InBodyCompilationContext): Statement {
         val meta = data.info.meta.metaForLoop(jump.loop)
         meta.hasContinue = true
-        return BreakStatement(meta.innerLabelForContinue)
+        return BreakStatement(meta.innerLabelForContinue).withIrOffsets(jump)
     }
 
     override fun visitWhileLoop(loop: IrWhileLoop, data: InBodyCompilationContext): Statement {
@@ -87,12 +88,7 @@ object BodyCompiler : IrElementVisitor<Statement, InBodyCompilationContext> {
 
     override fun visitReturn(expression: IrReturn, data: InBodyCompilationContext): Statement {
         // todo: Can we be sure that each return only refers to the innermost function here?
-        return ReturnStatement(
-            compileExpression(
-                expression.value,
-                data
-            )
-        )
+        return ReturnStatement(compileExpression(expression.value, data)).withIrOffsets(expression)
     }
 
     override fun visitVariable(declaration: IrVariable, data: InBodyCompilationContext): Statement {
@@ -100,10 +96,7 @@ object BodyCompiler : IrElementVisitor<Statement, InBodyCompilationContext> {
             name = declaration.name.identifier,
             type = data.info.dartIntrinsics.intrinsicType(declaration.type),
             initializer = declaration.initializer?.let {
-                compileExpression(
-                    it,
-                    data
-                )
+                compileExpression(it, data)
             }
         )
         data.variables[declaration.symbol] = kernelDeclaration
@@ -111,6 +104,8 @@ object BodyCompiler : IrElementVisitor<Statement, InBodyCompilationContext> {
         kernelDeclaration.isFinal = !declaration.isVar
         kernelDeclaration.isInScope = true
         kernelDeclaration.isLate = declaration.isLateinit
+
+        kernelDeclaration.fileOffset = declaration.startOffset
 
         return kernelDeclaration
     }
@@ -122,7 +117,7 @@ object BodyCompiler : IrElementVisitor<Statement, InBodyCompilationContext> {
         for (branch in expression.branches) {
             val dartCondition = compileExpression(branch.condition, data)
             val then = branch.result.accept(this, data)
-            val dartIf = IfStatement(dartCondition, then)
+            val dartIf = IfStatement(dartCondition, then).withIrOffsets(branch)
 
             when {
                 root == null -> {

@@ -33,7 +33,8 @@ the stdlib location from the setup step as parameter. This will compile all Kotl
 
 ### Viewing generated Dart
 
-To view a generated `.dill` file in text form, you can run `dart tool/kernel_to_text.dart < file.dill`.
+To view a generated `.dill` file in text form, you can run 
+`dart kart_support/tool/kernel_to_text.dart < file.dill`.
 To run such file, just use `dart file.dill`.
 
 ### Project structure

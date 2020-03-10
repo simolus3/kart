@@ -14,6 +14,11 @@ class VariableDeclaration(
     initializer: Expression? = null
 ) : Statement(), HasFlags {
 
+    /**
+     * The offset for the equal sign in the declaration (if it contains one)
+     */
+    var fileEqualsOffset: Int = NO_OFFSET
+
     override var flags: Byte = 0
 
     var isFinal by flag(0)
