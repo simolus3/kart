@@ -41,6 +41,7 @@ private fun componentToText(component: Component): String {
 
 private fun generateOutputs(stdlibJar: String) {
     for (input in inputFiles) {
+        println("Now running on $input")
         val outputFile = input.resolveSibling("compiled.txt")
 
         val component = compileDirectoryToDart(stdlibJar, input.parent.normalize().toString())

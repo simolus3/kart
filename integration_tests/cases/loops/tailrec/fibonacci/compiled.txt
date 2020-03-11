@@ -14,13 +14,20 @@ library from "fibonacci" as fib {
         final core::int b = b;
         return block {
           final core::int tmp0_subject = n;
-        } =>tmp0_subject.{core::Object::==}(0) ? a : tmp0_subject.{core::Object::==}(1) ? b : block {
-          n = n.{core::int::-}(1);
-          a = b;
-          b = a.{core::int::+}(b);
         } => block {
-          break #L2;
-        } =>invalid-expression "Should not get here";
+          late core::int tmp_0;
+          if(tmp0_subject.{core::Object::==}(0))
+            tmp_0 = a;
+          else
+            if(tmp0_subject.{core::Object::==}(1))
+              tmp_0 = b;
+            else {
+              n = n.{core::int::-}(1);
+              a = b;
+              b = a.{core::int::+}(b);
+              break #L2;
+            }
+        } =>tmp_0;
         break #L1;
       }
   }
@@ -31,6 +38,6 @@ library from "fibonacci" as fib {
     return fib::fibonacci(n, a, b);
   }
   method main() → void {
-    core::print();
+    core::print(fib::fibonacci$default(5, 0, 0, 6));
   }
 }

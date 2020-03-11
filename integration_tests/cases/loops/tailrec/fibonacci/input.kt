@@ -7,5 +7,5 @@ tailrec fun fibonacci(n: Long, a: Long = 0L, b: Long = 1L): Long = when (n) {
 }
 
 fun main() {
-    println()
+    println(fibonacci(5))
 }

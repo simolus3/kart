@@ -1,6 +1,7 @@
 package eu.simonbinder.kart.kotlin
 
 import eu.simonbinder.kart.kotlin.lower.DartDefaultArgumentStubGenerator
+import eu.simonbinder.kart.kotlin.lower.ExpressionToStatementLowering
 import eu.simonbinder.kart.kotlin.lower.PrimitiveTypeLowering
 import org.jetbrains.kotlin.backend.common.CommonBackendContext
 import org.jetbrains.kotlin.backend.common.lower.*
@@ -99,6 +100,12 @@ private val removeInlineFunctionsWithReifiedTypeParametersLoweringPhase = makeIr
     prerequisite = setOf(functionInliningPhase)
 )
 
+private val expressionToStatementLoweringPhase = makeIrModulePhase(
+    ::ExpressionToStatementLowering,
+    name = "ExpressionToStatementLoweringPhase",
+    description = "Transforms complex expressions into statements by introducing variables"
+)
+
 private val primitiveTypeLoweringPhase = makeIrModulePhase(
     ::PrimitiveTypeLowering,
     name = "PrimitiveTypeLowering",
@@ -115,8 +122,9 @@ val dartPhases = namedIrModulePhase(
             defaultArgumentStubGeneratorPhase then
             defaultParameterInjectorPhase then
             defaultParameterCleanerPhase then
-           // functionInliningPhase then
+            // functionInliningPhase then
             //removeInlineFunctionsWithReifiedTypeParametersLoweringPhase then
             tailrecLoweringPhase then
+            expressionToStatementLoweringPhase then
             primitiveTypeLoweringPhase
 )

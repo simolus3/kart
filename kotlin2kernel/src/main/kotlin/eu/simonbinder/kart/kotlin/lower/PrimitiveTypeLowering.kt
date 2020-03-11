@@ -13,7 +13,7 @@ import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
  */
 class PrimitiveTypeLowering(private val context: DartBackendContext) : BodyLoweringPass {
     override fun lower(irBody: IrBody) {
-        irBody.transformChildrenVoid(PrimitiveLoweringTransformer(context))
+        return irBody.transformChildrenVoid(PrimitiveLoweringTransformer(context))
     }
 }
 

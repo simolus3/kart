@@ -14,6 +14,7 @@ import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.util.SymbolTable
 import org.jetbrains.kotlin.psi2ir.findFirstFunction
+import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 
 class DartIntrinsics (
@@ -116,7 +117,8 @@ class DartIntrinsics (
             irBuiltIns.doubleClass -> dartNames.doubleType.withNullabilityOfIr(type)
             irBuiltIns.unitClass -> VoidType
             irBuiltIns.stringClass -> dartNames.stringType.withNullabilityOfIr(type)
-            else -> throw IllegalArgumentException("Cannot map $type to Dart")
+            irBuiltIns.nothingClass -> NeverType(if (type.isNullable()) Nullability.NULLABLE else Nullability.NON_NULLABLE)
+            else -> throw IllegalArgumentException("Cannot map ${type.classOrNull?.descriptor?.fqNameOrNull() ?: type} to Dart")
         }
     }
 

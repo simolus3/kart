@@ -14,14 +14,6 @@ import org.jetbrains.kotlin.utils.addToStdlib.cast
 object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContext> {
 
     override fun visitElement(element: IrElement, data: InBodyCompilationContext): Expression {
-        // todo: We should probably apply some transformation so that these don't appear as expressions
-        if (element is IrBreakContinue || element is IrReturn) {
-            return BlockExpression(
-                body = listOf(element.accept(BodyCompiler, data)),
-                value = InvalidExpression("Should not get here")
-            )
-        }
-
         throw NotImplementedError("Can't compile expression: $element")
     }
 
