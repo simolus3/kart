@@ -20,6 +20,11 @@ class Library(
     val members = children(members)
     var name: String? = null
 
+    /**
+     * All sources that contributed to this library.
+     */
+    val sourceUris = mutableListOf<Uri>()
+
     init {
         isNonNullableByDefault = true
     }

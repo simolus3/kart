@@ -8,11 +8,11 @@ class Source(
 
     val lineStarts: List<Int> by lazy {
         val chars = content.toCharArray()
-        val lineBreakPositions = mutableListOf<Int>()
+        val lineBreakPositions = mutableListOf(0)
 
         chars.forEachIndexed { index, c ->
             if (c == '\n') {
-                lineBreakPositions.add(index)
+                lineBreakPositions.add(index + 1)
             }
         }
 

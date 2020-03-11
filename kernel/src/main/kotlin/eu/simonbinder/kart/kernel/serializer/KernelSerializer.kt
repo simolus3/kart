@@ -187,7 +187,13 @@ class KernelSerializer(
 
             writeString(uriString)
             writeString(content)
-            writeList(source.lineStarts) { writeUint(it.toUInt()) }
+
+            // Line starts are delta-encoded
+            var previous = 0
+            writeList(source.lineStarts) { start ->
+                writeUint((start - previous).toUInt())
+                previous = start
+            }
 
             writeString(source.importUri?.content ?: "")
         }
@@ -240,14 +246,24 @@ class KernelSerializer(
             writeCanonicalNameReference(it.parent)
             writeStringReference(it.name)
         }
-        binaryOffsetForMetadataPayloads = currentOffset
-        // no metadata
-        binaryOffsetForMetadataMappings = currentOffset
-        writeUint32(0u) // no metadata mappings (it's a RList)
+        writeMetadataSection(node)
         writeStringTable()
         binaryOffsetForConstantTable = currentOffset
         writeUint32(0u) // no constants
         writeIndex(node)
+    }
+
+    private fun writeMetadataSection(component: Component) {
+        // Note: The VM expects binaryOffsetsForMetadataPayloads to be word-aligned.
+        // https://github.com/dart-lang/sdk/blob/684c53a6f174bcefd4e8202391a1a761abccead8/runtime/vm/kernel_loader.cc#L403
+        val padding = 8 - (currentOffset.toInt() % 8)
+        repeat(padding) { writeByte(0u) }
+
+        binaryOffsetForMetadataPayloads = currentOffset
+
+        // no metadata
+        binaryOffsetForMetadataMappings = currentOffset
+        writeUint32(0u) // no metadata mappings (it's a RList)
     }
 
     private fun writeIndex(node: Component) {
@@ -303,7 +319,7 @@ class KernelSerializer(
         procedureOffsets[procedureOffsets.size - 1] = currentOffset
 
         val sourceReferencesOffset = currentOffset
-        writeUint(0u) // no source references
+        writeList(node.sourceUris, this::writeUriReference)
 
         writeUint32(sourceReferencesOffset)
         classOffsets.forEach(this::writeUint32)

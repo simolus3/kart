@@ -52,6 +52,8 @@ object LibraryCompiler : IrElementVisitor<Unit, InLibraryContext> {
         )
         procedure.fileUri = data.info.loadFile(declaration.file)
         procedure.startFileOffset = declaration.startOffset
+        procedure.fileOffset = declaration.startOffset
+        procedure.fileEndOffset = declaration.endOffset
 
         if (declaration.isMain()) {
             data.info.component.mainMethod = procedure

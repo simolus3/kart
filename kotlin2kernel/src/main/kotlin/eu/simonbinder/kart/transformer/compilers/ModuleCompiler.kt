@@ -13,6 +13,8 @@ object ModuleCompiler : IrElementVisitor<Unit, GlobalCompilationContext> {
 
     override fun visitFile(declaration: IrFile, data: GlobalCompilationContext) {
         val library = data.info.component.createLibrary(data.names.nameFor(declaration))
+        library.sourceUris.add(data.info.loadFile(declaration))
+
         declaration.acceptChildren(LibraryCompiler, data.inLibrary(library))
     }
 }
