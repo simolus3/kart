@@ -22,9 +22,9 @@ library from "fibonacci" as fib {
             if(tmp0_subject.{core::Object::==}(1))
               tmp_0 = b;
             else {
-              n = n.{core::int::-}(1);
+              n = n.{core::num::-}(1);
               a = b;
-              b = a.{core::int::+}(b);
+              b = a.{core::num::+}(b);
               break #L2;
             }
         } =>tmp_0;

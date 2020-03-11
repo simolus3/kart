@@ -7,7 +7,7 @@ library from "rootKt" as roo {
     while (true)
       #L2:
       {
-        x = x.{core::int::+}(1);
+        x = x.{core::num::+}(1);
         final core::int y = block {
           final core::int tmp0_subject = x;
         } => block {
@@ -18,7 +18,7 @@ library from "rootKt" as roo {
             if(tmp0_subject.{core::Object::==}(5))
               break #L1;
             else
-              tmp_0 = x.{core::int::+}(1);
+              tmp_0 = x.{core::num::+}(1);
         } =>tmp_0;
         core::print(y);
       }

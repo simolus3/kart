@@ -11,6 +11,7 @@ class ImportantDartNames(private val root: CanonicalName) {
     val objectName = dartCore.getChild("Object")
 
     val intName = dartCore.getChild("int")
+    val numName = dartCore.getChild("num")
     val intType = InterfaceType(classReference = intName.asReference())
     val doubleType = InterfaceType(classReference = dartCore.getChild("double").asReference())
     val stringType = InterfaceType(classReference = dartCore.getChild("String").asReference())
@@ -20,7 +21,7 @@ class ImportantDartNames(private val root: CanonicalName) {
     val objectEquals = objectName.getChild("@methods").getChild("==").asReference()
     val identical = dartCore.getChild("@methods").getChild("identical").asReference()
 
-    val intPlus = intName.getChild("@methods").getChild("+").asReference()
-    val intMinus = intName.getChild("@methods").getChild("-").asReference()
+    val numPlus = numName.getChild("@methods").getChild("+").asReference()
+    val numMinus = numName.getChild("@methods").getChild("-").asReference()
     val intAnd = intName.getChild("@methods").getChild("&").asReference()
 }

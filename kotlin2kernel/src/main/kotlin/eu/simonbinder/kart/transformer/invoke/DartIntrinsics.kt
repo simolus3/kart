@@ -6,14 +6,11 @@ import eu.simonbinder.kart.kernel.expressions.*
 import eu.simonbinder.kart.kernel.types.*
 import eu.simonbinder.kart.transformer.names.ImportantDartNames
 import eu.simonbinder.kart.transformer.withIrOffsets
-import org.jetbrains.kotlin.descriptors.FunctionDescriptor
 import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.util.SymbolTable
-import org.jetbrains.kotlin.psi2ir.findFirstFunction
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 
@@ -45,11 +42,11 @@ class DartIntrinsics (
             when (call.symbol.descriptor.name.identifier) {
                 "plus" -> {
                     dartName = DartName("+")
-                    reference = dartNames.intPlus
+                    reference = dartNames.numPlus
                 }
                 "minus" -> {
                     dartName = DartName("-")
-                    reference = dartNames.intMinus
+                    reference = dartNames.numMinus
                 }
                 "and" -> {
                     dartName = DartName("&")
