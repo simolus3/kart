@@ -18,7 +18,6 @@ object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContex
     }
 
     override fun visitBlock(expression: IrBlock, data: InBodyCompilationContext): Expression {
-        expression.getPackageFragment()
         val bodyWithoutReturn = expression.statements
             .asSequence()
             .map { it.accept(BodyCompiler, data) }

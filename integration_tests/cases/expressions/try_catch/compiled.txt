@@ -1,0 +1,15 @@
+main = roo::main;
+library from "rootKt" as roo {
+
+  method main() → void {
+    final core::int x = block {
+      late core::int tmp_0;
+      try {
+        tmp_0 = 1.{core::num::~/}(0);
+      }
+      on dynamic catch(final dynamic e) {
+        tmp_0 = 2;
+      }
+    } =>tmp_0;
+  }
+}

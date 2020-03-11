@@ -93,7 +93,7 @@ object BodyCompiler : IrElementVisitor<Statement, InBodyCompilationContext> {
 
     override fun visitTry(aTry: IrTry, data: InBodyCompilationContext): Statement {
         var stmt: Statement = TryCatch(
-            body = aTry.accept(this, data),
+            body = aTry.tryResult.accept(this, data),
             catches = aTry.catches.map { irCatch ->
                 val dartType = data.info.dartTypeFor(irCatch.catchParameter.type)
                 Catch(

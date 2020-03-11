@@ -48,6 +48,10 @@ class DartIntrinsics (
                     dartName = DartName("-")
                     reference = dartNames.numMinus
                 }
+                "div" -> {
+                    dartName = DartName("~/")
+                    reference = dartNames.numTruncatingDivision
+                }
                 "and" -> {
                     dartName = DartName("&")
                     reference = dartNames.intAnd
@@ -115,6 +119,13 @@ class DartIntrinsics (
             irBuiltIns.unitClass -> VoidType
             irBuiltIns.stringClass -> dartNames.stringType.withNullabilityOfIr(type)
             irBuiltIns.nothingClass -> NeverType(if (type.isNullable()) Nullability.NULLABLE else Nullability.NON_NULLABLE)
+            irBuiltIns.anyClass -> {
+                if (type.isNullable()) {
+                    DynamicType // todo: Should Any? be mapped to void in Dart?
+                } else {
+                    dartNames.objectType
+                }
+            }
             else -> throw IllegalArgumentException("Cannot map ${type.classOrNull?.descriptor?.fqNameOrNull() ?: type} to Dart")
         }
     }

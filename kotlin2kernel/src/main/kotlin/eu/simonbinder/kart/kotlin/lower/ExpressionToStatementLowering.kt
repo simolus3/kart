@@ -123,6 +123,7 @@ private class ExpressionToSetVariableTransformer(
 
     override fun visitTry(aTry: IrTry, data: ExpressionUsage): IrExpression {
         return aTry.transformToVariableSet(data) { usage ->
+            val finally = aTry.finallyExpression?.transform(this@ExpressionToSetVariableTransformer, ExpressionUsage.STATEMENT)
             aTry.transformChildren(this@ExpressionToSetVariableTransformer, usage)
             aTry
         }
