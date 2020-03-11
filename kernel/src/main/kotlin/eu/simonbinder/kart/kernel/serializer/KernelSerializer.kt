@@ -438,6 +438,14 @@ class KernelSerializer(
         writeByte(Tags.NULL_LITERAL)
     }
 
+    override fun visitAsExpression(node: AsExpression) {
+        writeByte(Tags.AS_EXPRESSION)
+        writeFileOffset(node.fileOffset)
+        writeByte(node.flags.toUInt())
+        writeExpression(node.operand)
+        writeType(node.targetType)
+    }
+
     override fun visitBlockExpression(node: BlockExpression) {
         scoped(variableScope = true) {
             writeByte(Tags.BLOCK_EXPRESSION)
@@ -452,6 +460,14 @@ class KernelSerializer(
         writeExpression(node.then)
         writeExpression(node.otherwise)
         writeOption(node.staticType, this::writeType)
+    }
+
+    override fun visitIsExpression(node: IsExpression) {
+        writeByte(Tags.IS_EXPRESSION)
+        writeFileOffset(node.fileOffset)
+        writeByte(node.flags.toUInt())
+        writeExpression(node.operand)
+        writeType(node.targetType)
     }
 
     override fun visitNot(node: Not) {
@@ -476,6 +492,12 @@ class KernelSerializer(
         writeByte(Tags.STRING_CONCATENATION)
         writeFileOffset(node.fileOffset)
         writeList(node.expressions, this::writeExpression)
+    }
+
+    override fun visitThrow(node: Throw) {
+        writeByte(Tags.THROW)
+        writeFileOffset(node.fileOffset)
+        writeExpression(node.value)
     }
 
     override fun visitVariableGet(node: VariableGet) {

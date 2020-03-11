@@ -41,4 +41,5 @@ interface ExpressionVisitor<R> {
     fun visitBlockExpression(node: BlockExpression): R = defaultExpression(node)
     fun visitStringConcatenation(node: StringConcatenation): R = defaultExpression(node)
     fun visitInvalidExpression(node: InvalidExpression): R = defaultExpression(node)
+    fun visitThrow(node: Throw): R = defaultExpression(node)
 }

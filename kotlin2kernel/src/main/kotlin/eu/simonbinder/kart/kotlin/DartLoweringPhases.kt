@@ -3,6 +3,7 @@ package eu.simonbinder.kart.kotlin
 import eu.simonbinder.kart.kotlin.lower.DartDefaultArgumentStubGenerator
 import eu.simonbinder.kart.kotlin.lower.ExpressionToStatementLowering
 import eu.simonbinder.kart.kotlin.lower.PrimitiveTypeLowering
+import eu.simonbinder.kart.kotlin.lower.TypeOperatorLowering
 import org.jetbrains.kotlin.backend.common.CommonBackendContext
 import org.jetbrains.kotlin.backend.common.lower.*
 import org.jetbrains.kotlin.backend.common.lower.inline.FunctionInlining
@@ -112,6 +113,12 @@ private val primitiveTypeLoweringPhase = makeIrModulePhase(
     description = "Replace usages of primitive types with Long and Double"
 )
 
+private val typeOperatorLowering = makeIrModulePhase(
+    ::TypeOperatorLowering,
+    name = "TypeOperatorLowering",
+    description = "Replace some common type operators in IR"
+)
+
 val dartPhases = namedIrModulePhase(
     name = "DartIrModuleLowering",
     description = "Lower Kotlin IR to make Dart compilation easier",
@@ -126,5 +133,6 @@ val dartPhases = namedIrModulePhase(
             //removeInlineFunctionsWithReifiedTypeParametersLoweringPhase then
             tailrecLoweringPhase then
             expressionToStatementLoweringPhase then
-            primitiveTypeLoweringPhase
+            primitiveTypeLoweringPhase then
+            typeOperatorLowering
 )

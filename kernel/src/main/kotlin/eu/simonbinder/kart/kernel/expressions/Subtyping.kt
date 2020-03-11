@@ -2,15 +2,19 @@ package eu.simonbinder.kart.kernel.expressions
 
 import eu.simonbinder.kart.kernel.TreeVisitor
 import eu.simonbinder.kart.kernel.types.DartType
+import eu.simonbinder.kart.kernel.utils.HasFlags
 import eu.simonbinder.kart.kernel.utils.child
+import eu.simonbinder.kart.kernel.utils.flag
 
 class IsExpression(
     operand: Expression,
-    val targetType: DartType,
-    val respectNullability: Boolean = true
-) : Expression() {
+    val targetType: DartType
+) : Expression(), HasFlags {
 
+    override var flags: Byte = 0
     var operand: Expression by child(operand)
+
+    var isForNonNullableByDefault by flag(0)
 
     override fun <T> accept(visitor: TreeVisitor<T>): T {
         return visitor.visitIsExpression(this)
@@ -23,13 +27,16 @@ class IsExpression(
 
 class AsExpression(
     operand: Expression,
-    val targetType: DartType,
-    val isTypeError: Boolean = false,
-    val isForDynamic: Boolean = false,
-    val respectNullability: Boolean = true
-) : Expression() {
+    val targetType: DartType
+) : Expression(), HasFlags {
 
     var operand: Expression by child(operand)
+    override var flags: Byte = 0
+
+    var isTypeError by flag(0)
+    var isCovarianceCheck by flag(1)
+    var isForDynamic by flag(2)
+    var isForNonNullableByDefault by flag(3)
 
     override fun <T> accept(visitor: TreeVisitor<T>): T {
         return visitor.visitAsExpression(this)
