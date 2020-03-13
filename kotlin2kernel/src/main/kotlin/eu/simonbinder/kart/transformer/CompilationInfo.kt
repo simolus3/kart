@@ -33,7 +33,8 @@ class CompilationInfo(
 
         val content = File(file.path).readText(Charsets.UTF_8)
         val uri = Uri.file(file.path)
-        visitedFiles[symbol] = Source(content, importUri = null, fileUri = uri)
+        // Note: We set the importUri because it's the only one respected by the VM - it shows up in stack traces.
+        visitedFiles[symbol] = Source(content, importUri = uri, fileUri = uri)
         return uri
     }
 
