@@ -24,5 +24,11 @@ class ImportantDartNames(private val root: CanonicalName) {
     val numPlus = numName.getChild("@methods").getChild("+").asReference()
     val numMinus = numName.getChild("@methods").getChild("-").asReference()
     val numTruncatingDivision = numName.getChild("@methods").getChild("~/").asReference()
+    val numMod = numName.getChild("@methods").getChild("%").asReference()
     val intAnd = intName.getChild("@methods").getChild("&").asReference()
+
+    val numLess = numName.getChild("@methods").getChild("<").asReference()
+    val numLessEq = numName.getChild("@methods").getChild("<=").asReference()
+    val numMore = numName.getChild("@methods").getChild(">").asReference()
+    val numMoreEq = numName.getChild("@methods").getChild(">=").asReference()
 }

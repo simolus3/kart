@@ -19,8 +19,13 @@ class TypeOperatorLowering(val context: DartBackendContext): FunctionLoweringPas
         irFunction.transformChildrenVoid(object : IrElementTransformerVoid() {
             override fun visitTypeOperator(expression: IrTypeOperatorCall): IrExpression {
                 return when (expression.operator) {
-                    // Byte, Short, etc. are all dart.core::int, so nothing is necessary here
-                    IrTypeOperator.IMPLICIT_INTEGER_COERCION -> expression.argument
+                    // Nothing is necessary for implicit integer coercions, since all Kotlin integer types map to
+                    // dart.core::int. (todo: Do we need to and an appropriate bitmask when going to smaller types?)
+                    // kotlin.Unit is represented as VoidType in Kernel, which is a top type. Since any value can be
+                    // assigned to it, coercing to unit is a no-op as well.
+                    IrTypeOperator.IMPLICIT_INTEGER_COERCION, IrTypeOperator.IMPLICIT_COERCION_TO_UNIT -> {
+                        expression.argument
+                    }
                     IrTypeOperator.NOT_INSTANCEOF -> {
                         // NOT_INSTANCEOF => !INSTANCEOF
 
@@ -41,6 +46,7 @@ class TypeOperatorLowering(val context: DartBackendContext): FunctionLoweringPas
                     }
                     IrTypeOperator.SAFE_CAST -> {
                         // x as? T => if (x is T) x else null
+
                         builder.at(expression).irComposite {
                             val tempVar = irTemporary(expression.argument)
                             +tempVar
@@ -57,7 +63,7 @@ class TypeOperatorLowering(val context: DartBackendContext): FunctionLoweringPas
                         }
                      }
                     else -> expression
-                }
+                }.also { it.transformChildrenVoid(this) }
             }
         })
     }

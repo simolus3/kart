@@ -23,7 +23,10 @@ class Component(
         return Library(
             dartVersion = dartVersion,
             reference = reference
-        ).also { libraries += it }
+        ).also {
+            it.nonNullableByDefaultCompiledMode = NonNullableByDefaultCompiledMode.Strong
+            libraries += it
+        }
     }
 
     override fun <T> accept(visitor: TreeVisitor<T>): T {

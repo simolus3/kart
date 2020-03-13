@@ -14,8 +14,34 @@ class Library(
 
     override var flags: Byte = 0
 
+    // note: flag(0) is unused
     var isSynthetic by flag(1)
     var isNonNullableByDefault by flag(2)
+    private var nnbdModeBit1 by flag(3)
+    private var nnbdModeBit2 by flag(4)
+
+    var nonNullableByDefaultCompiledMode: NonNullableByDefaultCompiledMode
+    get() {
+        val weak = nnbdModeBit1
+        val strong = nnbdModeBit2
+
+        return when {
+            weak && strong -> NonNullableByDefaultCompiledMode.Agnostic
+            strong -> NonNullableByDefaultCompiledMode.Strong
+            weak -> NonNullableByDefaultCompiledMode.Weak
+            else -> NonNullableByDefaultCompiledMode.Disabled
+        }
+    }
+    set(value) {
+        val modeBits = when (value) {
+            NonNullableByDefaultCompiledMode.Disabled -> false to false
+            NonNullableByDefaultCompiledMode.Weak -> true to false
+            NonNullableByDefaultCompiledMode.Strong -> false to true
+            NonNullableByDefaultCompiledMode.Agnostic -> true to true
+        }
+        nnbdModeBit1 = modeBits.first
+        nnbdModeBit2 = modeBits.second
+    }
 
     val members = children(members)
     var name: String? = null
@@ -37,4 +63,11 @@ class Library(
         members.forEach { it.accept(visitor) }
     }
 
+}
+
+enum class NonNullableByDefaultCompiledMode {
+    Disabled,
+    Weak,
+    Strong,
+    Agnostic
 }

@@ -52,6 +52,10 @@ class DartIntrinsics (
                     dartName = DartName("~/")
                     reference = dartNames.numTruncatingDivision
                 }
+                "mod" -> {
+                    dartName = DartName("%")
+                    reference = dartNames.numMod
+                }
                 "and" -> {
                     dartName = DartName("&")
                     reference = dartNames.intAnd
@@ -98,6 +102,14 @@ class DartIntrinsics (
             }
             irBuiltIns.booleanNotSymbol -> Not(exprCompiler(call.dispatchReceiver!!))
             irBuiltIns.checkNotNullSymbol -> NullCheck(getCompiled(0)).withIrOffsets(call)
+            in irBuiltIns.lessFunByOperandType.values -> {
+                MethodInvocation(
+                    receiver = getCompiled(0),
+                    name = DartName("<", null),
+                    reference = dartNames.numLess,
+                    arguments = Arguments(positional = listOf(getCompiled(1)))
+                )
+            }
             else -> {
                 println("Call not known as intrinsic: ${symbol.descriptor.fqNameSafe}")
                 null

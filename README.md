@@ -45,7 +45,7 @@ Finally, run `dart2js <file_linked.dill>`.
 
 To view a generated `.dill` file in text form, you can run 
 `dart kart_support/tool/kernel_to_text.dart < file.dill`.
-To run such file, just use `dart file.dill`.
+To run such file, just use `dart --null-safety file.dill`.
 
 ### Project structure
 
