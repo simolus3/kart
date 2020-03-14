@@ -4,10 +4,7 @@ import eu.simonbinder.kart.kernel.CanonicalName
 import eu.simonbinder.kart.kernel.Name as DartName
 import eu.simonbinder.kart.kernel.Reference
 import eu.simonbinder.kart.kernel.asReference
-import org.jetbrains.kotlin.ir.declarations.IrDeclaration
-import org.jetbrains.kotlin.ir.declarations.IrField
-import org.jetbrains.kotlin.ir.declarations.IrFile
-import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.name.Name
 
@@ -37,6 +34,8 @@ class Names {
             } else {
                 baseName.getChild(CanonicalName.METHODS).getChild(declaration.name.identifier)
             }
+        } else if (declaration is IrClass) {
+            baseName.getChild(declaration.name.identifier)
         } else {
             TODO()
         }

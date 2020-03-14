@@ -60,7 +60,7 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
         val procedure = Procedure(
             kind = kind,
             function = FunctionNode(
-                body = declaration.body!!.accept(BodyCompiler, contextForBody),
+                body = declaration.body?.accept(BodyCompiler, contextForBody),
                 positionalParameters = parameters,
                 returnType = data.info.dartIntrinsics.intrinsicType(declaration.returnType)
             ).also {

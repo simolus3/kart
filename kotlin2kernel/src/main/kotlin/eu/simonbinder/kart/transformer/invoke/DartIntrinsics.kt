@@ -132,6 +132,7 @@ class DartIntrinsics (
             irBuiltIns.longClass -> dartNames.intType.withNullabilityOfIr(type)
             irBuiltIns.floatClass,
             irBuiltIns.doubleClass -> dartNames.doubleType.withNullabilityOfIr(type)
+            irBuiltIns.booleanClass -> dartNames.boolType.withNullabilityOfIr(type)
             irBuiltIns.unitClass -> VoidType
             irBuiltIns.stringClass -> dartNames.stringType.withNullabilityOfIr(type)
             irBuiltIns.nothingClass -> NeverType(if (type.isNullable()) Nullability.NULLABLE else Nullability.NON_NULLABLE)

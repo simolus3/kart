@@ -42,6 +42,12 @@ Future<Uint8List> _readFromStdin([int maxSize]) async {
 
 class _RemoveSourceTransformer extends Transformer {
   @override
+  TreeNode visitClass(Class node) {
+    node.fileUri = null;
+    return super.visitClass(node);
+  }
+
+  @override
   TreeNode visitField(Field node) {
     node.fileUri = null;
     return super.visitField(node);

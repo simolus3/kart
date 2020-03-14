@@ -13,6 +13,7 @@ class ImportantDartNames(private val root: CanonicalName) {
     val intName = dartCore.getChild("int")
     val numName = dartCore.getChild("num")
     val intType = InterfaceType(classReference = intName.asReference())
+    val boolType = InterfaceType(classReference = dartCore.getChild("bool").asReference())
     val doubleType = InterfaceType(classReference = dartCore.getChild("double").asReference())
     val stringType = InterfaceType(classReference = dartCore.getChild("String").asReference())
     val objectType = InterfaceType(classReference = objectName.asReference())
