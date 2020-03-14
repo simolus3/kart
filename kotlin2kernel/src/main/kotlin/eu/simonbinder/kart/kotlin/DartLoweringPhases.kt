@@ -60,6 +60,18 @@ private val innerClassConstructorCallsLoweringPhase = makeIrModulePhase(
     description = "Replace inner class constructor invocation"
 )
 
+private val propertiesLoweringPhase = makeIrModulePhase<DartBackendContext>(
+    { context -> PropertiesLowering(context) },
+    name = "PropertiesLowering",
+    description = "Move fields and accessors out from its property"
+)
+
+private val initializersLoweringPhase = makeIrModulePhase(
+    { context: DartBackendContext -> InitializersLowering(context, DartDeclarationOrigin.LOWERED_INIT_BLOCK, false) },
+    name = "Initializers",
+    description = "Lower initializers"
+)
+
 private val defaultArgumentStubGeneratorPhase = makeIrModulePhase(
     ::DartDefaultArgumentStubGenerator,
     name = "DefaultArgumentStubGenerator",
@@ -126,6 +138,8 @@ val dartPhases = namedIrModulePhase(
             stripTypeAliasDeclarationsPhase then
             innerClassesLoweringPhase then
             innerClassConstructorCallsLoweringPhase then
+            propertiesLoweringPhase then
+            initializersLoweringPhase then
             defaultArgumentStubGeneratorPhase then
             defaultParameterInjectorPhase then
             defaultParameterCleanerPhase then

@@ -79,7 +79,7 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
     }
 
     override fun visitProperty(declaration: IrProperty, data: T) {
-        declaration.acceptChildren(this, data)
+        throw AssertionError("Property should have been lowered")
     }
 
     override fun visitField(declaration: IrField, data: T) {

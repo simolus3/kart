@@ -10,7 +10,7 @@ object ClassMemberCompiler : BaseMemberCompiler<InClassContext>() {
         get() = false
 
     override fun visitConstructor(declaration: IrConstructor, data: InClassContext) {
-
+        
     }
 
     override fun visitFunction(declaration: IrFunction, data: InClassContext) {

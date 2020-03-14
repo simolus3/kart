@@ -27,6 +27,7 @@ compileKotlin {
 
     kotlinOptions {
         freeCompilerArgs += "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes"
+        languageVersion = "1.3"
     }
 }
 
