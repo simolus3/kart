@@ -19,7 +19,7 @@ class VariableDeclaration(
      */
     var fileEqualsOffset: Int = NO_OFFSET
 
-    override var flags: Byte = 0
+    override var flags: Int = 0
 
     var isFinal by flag(0)
     var isConst by flag(1)

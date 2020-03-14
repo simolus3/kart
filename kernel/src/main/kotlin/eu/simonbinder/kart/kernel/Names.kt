@@ -1,5 +1,6 @@
 package eu.simonbinder.kart.kernel
 
+import eu.simonbinder.kart.kernel.members.Field
 import eu.simonbinder.kart.kernel.members.Procedure
 
 /**
@@ -129,6 +130,7 @@ class Reference(var canonicalName: CanonicalName? = null) {
     lateinit var node: NamedNode
 
     val asProcedure: Procedure? get() = node as Procedure
+    val asField: Field? get() = node as Field
 }
 
 fun CanonicalName.asReference() = Reference(this)

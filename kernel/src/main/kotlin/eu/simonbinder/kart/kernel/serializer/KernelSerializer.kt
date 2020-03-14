@@ -3,14 +3,18 @@ package eu.simonbinder.kart.kernel.serializer
 import eu.simonbinder.kart.kernel.*
 import eu.simonbinder.kart.kernel.expressions.*
 import eu.simonbinder.kart.kernel.members.Component
+import eu.simonbinder.kart.kernel.members.Field
 import eu.simonbinder.kart.kernel.members.Library
 import eu.simonbinder.kart.kernel.members.Procedure
 import eu.simonbinder.kart.kernel.statements.*
 import eu.simonbinder.kart.kernel.types.*
+import eu.simonbinder.kart.kernel.utils.flag
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.io.OutputStream
 import java.util.*
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.math.absoluteValue
 
 /**
@@ -328,22 +332,37 @@ class KernelSerializer(
         writeUint32((procedureOffsets.size - 1).toUInt()) // class count
     }
 
+    override fun visitField(node: Field) {
+        scoped(memberScope = true) {
+            writeByte(Tags.FIELD)
+            writeCanonicalNameReference(node.canonicalName)
+            writeUriReference(node.fileUri)
+            writeFileOffset(node.fileOffset)
+            writeFileOffset(node.fileEndOffset)
+            writeUint(node.flags.toUInt())
+            writeName(node.name)
+            writeUint(0u) // annotations: List<Expression>
+            writeType(node.type)
+            writeOption(node.initializer, this::writeExpression)
+        }
+    }
+
     override fun visitProcedure(node: Procedure) {
-        enterScope(memberScope = true)
-        writeByte(Tags.PROCEDURE)
-        writeCanonicalNameReference(node.canonicalName)
-        writeUriReference(node.fileUri)
-        writeFileOffset(node.startFileOffset)
-        writeFileOffset(node.fileOffset)
-        writeFileOffset(node.fileEndOffset)
-        writeByte(node.kind.ordinal.toUInt())
-        writeUint(0u) // flags
-        visitName(node.name ?: emptyName)
-        writeUint(0u) // annotations
-        writeReference(null) // forwarding stub super target reference
-        writeReference(null) // forwarding stub interface target reference
-        writeOption(node.function, this::visitFunctionNode)
-        leaveScope(memberScope = true)
+        scoped(memberScope = true) {
+            writeByte(Tags.PROCEDURE)
+            writeCanonicalNameReference(node.canonicalName)
+            writeUriReference(node.fileUri)
+            writeFileOffset(node.startFileOffset)
+            writeFileOffset(node.fileOffset)
+            writeFileOffset(node.fileEndOffset)
+            writeByte(node.kind.ordinal.toUInt())
+            writeUint(0u) // flags
+            visitName(node.name ?: emptyName)
+            writeUint(0u) // annotations
+            writeReference(null) // forwarding stub super target reference
+            writeReference(null) // forwarding stub interface target reference
+            writeOption(node.function, this::visitFunctionNode)
+        }
     }
 
     override fun visitName(node: Name) {

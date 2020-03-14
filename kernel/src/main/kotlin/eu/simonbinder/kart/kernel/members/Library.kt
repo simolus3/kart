@@ -12,7 +12,7 @@ class Library(
     var fileUri: Uri? = null
 ) : NamedNode(reference), HasFlags {
 
-    override var flags: Byte = 0
+    override var flags: Int = 0
 
     // note: flag(0) is unused
     var isSynthetic by flag(1)

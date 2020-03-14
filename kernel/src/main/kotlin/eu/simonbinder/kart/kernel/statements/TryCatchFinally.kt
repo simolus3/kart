@@ -11,7 +11,7 @@ class TryCatch (
     catches: List<Catch>? = null
 ): Statement(), HasFlags {
 
-    override var flags: Byte = 0
+    override var flags: Int = 0
 
     var body by child(body)
     val catches = children(catches)

@@ -11,7 +11,7 @@ class IsExpression(
     val targetType: DartType
 ) : Expression(), HasFlags {
 
-    override var flags: Byte = 0
+    override var flags: Int = 0
     var operand: Expression by child(operand)
 
     var isForNonNullableByDefault by flag(0)
@@ -31,7 +31,7 @@ class AsExpression(
 ) : Expression(), HasFlags {
 
     var operand: Expression by child(operand)
-    override var flags: Byte = 0
+    override var flags: Int = 0
 
     var isTypeError by flag(0)
     var isCovarianceCheck by flag(1)
