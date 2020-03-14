@@ -4,6 +4,7 @@ import eu.simonbinder.kart.kernel.Reference
 import eu.simonbinder.kart.kernel.expressions.*
 import eu.simonbinder.kart.transformer.context.InBodyCompilationContext
 import eu.simonbinder.kart.transformer.context.names
+import eu.simonbinder.kart.transformer.identifierOrNull
 import eu.simonbinder.kart.transformer.withIrOffsets
 import org.jetbrains.kotlin.backend.common.serialization.proto.IrTypeOp
 import org.jetbrains.kotlin.ir.IrElement
@@ -50,7 +51,7 @@ object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContex
         if (intrinsic != null) return intrinsic.withIrOffsets(expression)
 
         // temporarily implement some more calls as intrinsics
-        intrinsic = when (expression.symbol.descriptor.name.identifier) {
+        intrinsic = when (expression.symbol.descriptor.name.identifierOrNull) {
             "println" -> {
                 val args = Arguments(
                     positional = List(expression.valueArgumentsCount) { index ->
@@ -66,11 +67,29 @@ object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContex
         if (intrinsic != null) return intrinsic.withIrOffsets(expression)
 
         val dartFunctionReference = data.names.nameFor(expression.symbol.owner)
-        return StaticInvocation(dartFunctionReference, Arguments(
-            positional = List(expression.valueArgumentsCount) { index ->
-                expression.getValueArgument(index)!!.accept(this, data)
-            }
-        )).withIrOffsets(expression)
+        val canonicalName = dartFunctionReference.canonicalName!!
+
+        return when {
+            canonicalName.isGetter -> StaticGet(dartFunctionReference)
+            canonicalName.isSetter -> StaticSet(dartFunctionReference, expression.getValueArgument(0)!!.accept(this, data))
+            canonicalName.isNonPropertyAccessorMethod -> StaticInvocation(dartFunctionReference, Arguments(
+                positional = List(expression.valueArgumentsCount) { index ->
+                    expression.getValueArgument(index)!!.accept(this, data)
+                }
+            ))
+            else -> throw UnsupportedOperationException("Did not expect a call to $canonicalName")
+        }.withIrOffsets(expression)
+    }
+
+    override fun visitGetField(expression: IrGetField, data: InBodyCompilationContext): Expression {
+        val dartField = data.names.nameFor(expression.symbol.owner)
+        return StaticGet(dartField).withIrOffsets(expression)
+    }
+
+    override fun visitSetField(expression: IrSetField, data: InBodyCompilationContext): Expression {
+        val dartField = data.names.nameFor(expression.symbol.owner)
+        val value = expression.value.accept(this, data)
+        return StaticSet(dartField, value).withIrOffsets(expression)
     }
 
     override fun visitTypeOperator(expression: IrTypeOperatorCall, data: InBodyCompilationContext): Expression {

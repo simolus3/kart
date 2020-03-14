@@ -76,7 +76,6 @@ class CanonicalName private constructor(
     val children get() = childByName.values
 
     fun hasChild(name: String) = childByName.containsKey(name)
-
     fun removeChild(name: String) = childByName.remove(name)
 
     fun getChild(name: String) = childByName.computeIfAbsent(name) {
@@ -107,6 +106,11 @@ class CanonicalName private constructor(
         reference = null
     }
 
+    val isField get() = parent?.name == FIELDS
+    val isGetter get() = parent?.name == GETTERS
+    val isSetter get() = parent?.name == SETTERS
+    val isNonPropertyAccessorMethod get() = parent?.name == METHODS
+
     override fun toString(): String {
         return when {
             isRoot -> "<root>"
@@ -119,6 +123,11 @@ class CanonicalName private constructor(
         fun root(): CanonicalName {
             return CanonicalName(null, "")
         }
+
+        const val FIELDS = "@fields"
+        const val GETTERS = "@getters"
+        const val SETTERS = "@setters"
+        const val METHODS = "@methods"
     }
 }
 

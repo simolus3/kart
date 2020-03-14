@@ -10,7 +10,7 @@ class Library(
     val dartVersion: DartVersion = DartVersion.LATEST,
     reference: Reference? = null,
     var fileUri: Uri? = null
-) : NamedNode(reference), HasFlags {
+) : NamedNode(reference), HasFlags, HasMembers {
 
     override var flags: Int = 0
 
@@ -43,7 +43,7 @@ class Library(
         nnbdModeBit2 = modeBits.second
     }
 
-    val members = children(members)
+    override val members = children(members)
     var name: String? = null
 
     /**

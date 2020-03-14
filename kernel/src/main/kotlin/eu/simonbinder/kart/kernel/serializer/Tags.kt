@@ -13,6 +13,8 @@ object Tags {
     const val INVALID_EXPRESSION = 19u
     const val VARIABLE_GET = 20u
     const val VARIABLE_SET = 21u
+    const val STATIC_GET = 26u
+    const val STATIC_SET = 27u
     const val METHOD_INVOCATION = 28u
     const val STATIC_INVOCATION = 30u
     const val NOT = 33u

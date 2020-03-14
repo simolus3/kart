@@ -22,6 +22,9 @@ enum class LogicalOperator {
     OR
 }
 
+/**
+ * A short-circuit and/or expression with boolean operands.
+ */
 class LogicalExpression(
     var operator: LogicalOperator,
     left: Expression? = null,

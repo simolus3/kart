@@ -1,16 +1,14 @@
 package eu.simonbinder.kart.transformer.names
 
 import eu.simonbinder.kart.kernel.CanonicalName
+import eu.simonbinder.kart.kernel.Name as DartName
 import eu.simonbinder.kart.kernel.Reference
-import eu.simonbinder.kart.kernel.types.DartType
-import eu.simonbinder.kart.kernel.types.DynamicType
+import eu.simonbinder.kart.kernel.asReference
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
+import org.jetbrains.kotlin.ir.declarations.IrField
 import org.jetbrains.kotlin.ir.declarations.IrFile
-import org.jetbrains.kotlin.ir.types.IrDynamicType
-import org.jetbrains.kotlin.ir.types.IrSimpleType
-import org.jetbrains.kotlin.ir.types.IrType
-import org.jetbrains.kotlin.ir.util.file
-import org.jetbrains.kotlin.ir.util.nameForIrSerialization
+import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.name.Name
 
 class Names {
@@ -24,10 +22,36 @@ class Names {
     fun nameFor(declaration: IrDeclaration): Reference = declarationToName.computeIfAbsent(declaration) {
         // todo support class members
         val library = nameFor(declaration.file)
+        val baseName = library.canonicalName!!
 
-        Reference(library.canonicalName!!
-            .getChild("@methods")
-            .getChild(declaration.nameForIrSerialization.identifier))
+        val name = if (declaration is IrField) {
+            // In Kernel, Fields and getters/setters are weirdly mixed up (one can use a StaticGet that refers to a
+            // getter, for instance). To cleanly separate fields and their accessors, we always suffix the field.
+            baseName.getChild(CanonicalName.FIELDS).getChild(declaration.name.identifier + "_field")
+        } else if (declaration is IrSimpleFunction) {
+            if (declaration.isGetter || declaration.isSetter) {
+                val nameOfField = declaration.correspondingPropertySymbol!!.descriptor.name.identifier
+                baseName
+                    .getChild(if (declaration.isGetter) CanonicalName.GETTERS else CanonicalName.SETTERS)
+                    .getChild(nameOfField)
+            } else {
+                baseName.getChild(CanonicalName.METHODS).getChild(declaration.name.identifier)
+            }
+        } else {
+            TODO()
+        }
+
+        name.asReference()
+    }
+
+    fun simpleNameFor(declaration: IrDeclaration, includeField: Boolean = true): DartName {
+        return if (declaration.isGetter || declaration.isSetter) {
+            simpleNameFor((declaration as IrSimpleFunction).correspondingPropertySymbol!!.owner, false)
+        } else if (includeField && declaration is IrField) {
+            DartName(declaration.name.identifier + "_field")
+        } else {
+            DartName(declaration.nameForIrSerialization.identifier)
+        }
     }
 
     fun nameFor(file: IrFile): Reference = fileToName.computeIfAbsent(file) {

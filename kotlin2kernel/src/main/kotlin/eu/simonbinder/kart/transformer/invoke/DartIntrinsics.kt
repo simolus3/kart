@@ -48,6 +48,10 @@ class DartIntrinsics (
                     dartName = DartName("-")
                     reference = dartNames.numMinus
                 }
+                "times" -> {
+                    dartName = DartName("*")
+                    reference = dartNames.numTimes
+                }
                 "div" -> {
                     dartName = DartName("~/")
                     reference = dartNames.numTruncatingDivision

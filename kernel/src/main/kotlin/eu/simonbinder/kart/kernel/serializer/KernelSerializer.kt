@@ -2,10 +2,7 @@ package eu.simonbinder.kart.kernel.serializer
 
 import eu.simonbinder.kart.kernel.*
 import eu.simonbinder.kart.kernel.expressions.*
-import eu.simonbinder.kart.kernel.members.Component
-import eu.simonbinder.kart.kernel.members.Field
-import eu.simonbinder.kart.kernel.members.Library
-import eu.simonbinder.kart.kernel.members.Procedure
+import eu.simonbinder.kart.kernel.members.*
 import eu.simonbinder.kart.kernel.statements.*
 import eu.simonbinder.kart.kernel.types.*
 import eu.simonbinder.kart.kernel.utils.flag
@@ -311,9 +308,11 @@ class KernelSerializer(
         writeUint(0u) // no classes
         classOffsets[0] = currentOffset
         writeUint(0u) // no extensions
-        writeUint(0u) // no fields
+        writeList(node.fields) { field ->
+            field.accept(this)
+        }
 
-        val procedures = node.members.filterIsInstance<Procedure>()
+        val procedures = node.procedures
         writeUint(procedures.size.toUInt())
         val procedureOffsets = UIntArray(procedures.size + 1)
         procedures.forEachIndexed { index, procedure ->
@@ -552,6 +551,19 @@ class KernelSerializer(
             writeUint(declarationPosition)
             writeUint(index)
         }
+        writeExpression(node.value)
+    }
+
+    override fun visitStaticGet(node: StaticGet) {
+        writeByte(Tags.STATIC_GET)
+        writeFileOffset(node.fileOffset)
+        writeReference(node.reference)
+    }
+
+    override fun visitStaticSet(node: StaticSet) {
+        writeByte(Tags.STATIC_SET)
+        writeFileOffset(node.fileOffset)
+        writeReference(node.reference)
         writeExpression(node.value)
     }
 

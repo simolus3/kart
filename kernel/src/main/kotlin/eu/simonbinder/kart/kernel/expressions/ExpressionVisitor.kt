@@ -23,6 +23,8 @@ interface ExpressionVisitor<R> {
     // Invocations
 
     fun visitStaticInvocation(node: StaticInvocation): R = defaultExpression(node)
+    fun visitStaticGet(node: StaticGet): R = defaultExpression(node)
+    fun visitStaticSet(node: StaticSet): R = defaultExpression(node)
     fun visitMethodInvocation(node: MethodInvocation): R = defaultExpression(node)
 
     // Variables
