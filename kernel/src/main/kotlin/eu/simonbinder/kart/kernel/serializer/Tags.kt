@@ -4,8 +4,8 @@ object Tags {
     const val NOTHING = 0u
     const val SOMETHING = 1u
 
+    const val CLASS = 2u
     const val FUNCTION_NODE = 3u
-
     const val FIELD = 4u
     const val CONSTRUCTOR = 5u
     const val PROCEDURE = 6u

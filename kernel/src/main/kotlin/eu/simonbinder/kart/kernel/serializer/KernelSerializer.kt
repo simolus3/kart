@@ -143,6 +143,23 @@ class KernelSerializer(
         }
     }
 
+    private fun writeNodesAndCollectOffsets(nodes: Collection<Node>): UIntArray {
+        writeUint(nodes.size.toUInt())
+
+        val offsets = UIntArray(nodes.size + 1)
+        nodes.forEachIndexed { index, node ->
+            offsets[index] = currentOffset
+            node.accept(this)
+        }
+        offsets[offsets.size - 1] = currentOffset
+        return offsets
+    }
+
+    private fun writeOffsetsFollowedByCountAsUint32(offsets: UIntArray) {
+        offsets.forEach(this::writeUint32)
+        writeUint32(offsets.size.toUInt() - 1u)
+    }
+
     private fun writeString(content: String) {
         val utf8Bytes = content.toByteArray(Charsets.UTF_8)
         writeUint(utf8Bytes.size.toUInt())
@@ -304,31 +321,40 @@ class KernelSerializer(
         writeUint(0u) // no additional exports
         writeUint(0u) // no library parts
         writeUint(0u) // no typedefs
-        val classOffsets = UIntArray(1)
-        writeUint(0u) // no classes
-        classOffsets[0] = currentOffset
+        val classOffsets = writeNodesAndCollectOffsets(node.classes)
         writeUint(0u) // no extensions
         writeList(node.fields) { field ->
             field.accept(this)
         }
-
-        val procedures = node.procedures
-        writeUint(procedures.size.toUInt())
-        val procedureOffsets = UIntArray(procedures.size + 1)
-        procedures.forEachIndexed { index, procedure ->
-            procedureOffsets[index] = currentOffset
-            procedure.accept(this)
-        }
-        procedureOffsets[procedureOffsets.size - 1] = currentOffset
-
+        val procedureOffsets = writeNodesAndCollectOffsets(node.procedures)
         val sourceReferencesOffset = currentOffset
         writeList(node.sourceUris, this::writeUriReference)
 
         writeUint32(sourceReferencesOffset)
-        classOffsets.forEach(this::writeUint32)
-        writeUint32((classOffsets.size - 1).toUInt()) // class count
-        procedureOffsets.forEach(this::writeUint32)
-        writeUint32((procedureOffsets.size - 1).toUInt()) // class count
+        writeOffsetsFollowedByCountAsUint32(classOffsets)
+        writeOffsetsFollowedByCountAsUint32(procedureOffsets)
+    }
+
+    override fun visitClass(node: Class) {
+        writeByte(Tags.CLASS)
+        writeCanonicalNameReference(node.canonicalName)
+        writeUriReference(node.fileUri)
+        writeFileOffset(node.startFileOffset)
+        writeFileOffset(node.fileOffset)
+        writeFileOffset(node.fileEndOffset)
+        writeByte(node.flags.toUInt())
+        writeStringReference(node.name)
+        writeUint(0u) // empty list of annotations
+        writeUint(0u) // empty type parameters list
+        writeOption(node.superClass, this::writeType)
+        writeOption(null) { throw AssertionError() } // mixedInType
+        writeList(node.implementedClasses, this::writeType)
+
+        writeList(node.fields) { it.accept(this) }
+        writeUint(0u) // constructors
+        val procedureOffsets = writeNodesAndCollectOffsets(node.procedures)
+        writeUint(0u) // redirecting factory constructors
+        writeOffsetsFollowedByCountAsUint32(procedureOffsets)
     }
 
     override fun visitField(node: Field) {
@@ -338,7 +364,7 @@ class KernelSerializer(
             writeUriReference(node.fileUri)
             writeFileOffset(node.fileOffset)
             writeFileOffset(node.fileEndOffset)
-            writeUint(node.flags.toUInt())
+            writeUint(node.flags.toUInt()) // Note: Fields have more than 8 flags, so use uint instead of byte
             writeName(node.name)
             writeUint(0u) // annotations: List<Expression>
             writeType(node.type)

@@ -4,6 +4,7 @@ import eu.simonbinder.kart.kernel.expressions.Arguments
 import eu.simonbinder.kart.kernel.expressions.Expression
 import eu.simonbinder.kart.kernel.expressions.ExpressionVisitor
 import eu.simonbinder.kart.kernel.expressions.NamedExpression
+import eu.simonbinder.kart.kernel.members.Class
 import eu.simonbinder.kart.kernel.members.Component
 import eu.simonbinder.kart.kernel.members.Library
 import eu.simonbinder.kart.kernel.members.Member
@@ -29,6 +30,7 @@ interface TreeVisitor<R> :
     fun visitComponent(node: Component): R = defaultTreeNode(node)
     fun visitFunctionNode(node: FunctionNode): R = defaultTreeNode(node)
     fun visitLibrary(node: Library): R = defaultTreeNode(node)
+    fun visitClass(node: Class): R = defaultTreeNode(node)
     fun visitNamedExpression(node: NamedExpression): R = defaultTreeNode(node)
     fun visitTypeParameter(node: TypeParameter): R = defaultTreeNode(node)
 }

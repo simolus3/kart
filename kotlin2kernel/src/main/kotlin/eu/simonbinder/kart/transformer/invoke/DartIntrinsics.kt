@@ -137,7 +137,7 @@ class DartIntrinsics (
             irBuiltIns.nothingClass -> NeverType(if (type.isNullable()) Nullability.NULLABLE else Nullability.NON_NULLABLE)
             irBuiltIns.anyClass, irBuiltIns.throwableClass -> {
                 if (type.isNullable()) {
-                    DynamicType // todo: Should Any? be mapped to void in Dart?
+                    DynamicType // todo: Should Any? be mapped to void in Dart? Or to dart:core::Object?
                 } else {
                     dartNames.objectType
                 }

@@ -44,6 +44,7 @@ class Library(
     }
 
     override val members = children(members)
+    val classes = children<Class>()
     var name: String? = null
 
     /**
@@ -61,6 +62,7 @@ class Library(
 
     override fun <T> visitChildren(visitor: TreeVisitor<T>) {
         members.forEach { it.accept(visitor) }
+        classes.forEach { it.accept(visitor) }
     }
 
 }
