@@ -3,15 +3,13 @@ package eu.simonbinder.kart.kernel.serializer
 import eu.simonbinder.kart.kernel.*
 import eu.simonbinder.kart.kernel.expressions.*
 import eu.simonbinder.kart.kernel.members.*
+import eu.simonbinder.kart.kernel.members.initializers.*
 import eu.simonbinder.kart.kernel.statements.*
 import eu.simonbinder.kart.kernel.types.*
-import eu.simonbinder.kart.kernel.utils.flag
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.io.OutputStream
 import java.util.*
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 import kotlin.math.absoluteValue
 
 /**
@@ -84,6 +82,10 @@ class KernelSerializer(
     private fun writeByte(value: UInt) {
         assert(value.toUByte().toUInt() == value)
         outputStream.writeByte(value.toInt())
+    }
+
+    private fun writeBool(boolean: Boolean) {
+        writeByte(if (boolean) 1u else 0u)
     }
 
     private fun writeUint7(value: UByte) {
@@ -355,6 +357,25 @@ class KernelSerializer(
         val procedureOffsets = writeNodesAndCollectOffsets(node.procedures)
         writeUint(0u) // redirecting factory constructors
         writeOffsetsFollowedByCountAsUint32(procedureOffsets)
+    }
+
+    override fun visitConstructor(node: Constructor) {
+        scoped(variableScope = true) {
+            writeByte(Tags.CONSTRUCTOR)
+            writeCanonicalNameReference(node.canonicalName)
+            writeUriReference(node.fileUri)
+            writeFileOffset(node.fileStartOffset)
+            writeFileOffset(node.fileOffset)
+            writeFileOffset(node.fileEndOffset)
+            writeByte(node.flags.toUInt())
+            writeName(node.name)
+            writeUint(0u) // empty list of annotations
+            visitFunctionNode(node.function)
+
+            // Parameters are in scope in the initializers
+            useVariableIndexer().restoreScope(node.function.totalParameterCount)
+            writeList(node.initializers) { it.accept(this) }
+        }
     }
 
     override fun visitField(node: Field) {
@@ -732,6 +753,25 @@ class KernelSerializer(
         writeFileOffset(node.fileOffset)
         writeExpression(node.condition)
         writeStatement(node.body)
+    }
+
+    // Initializers
+
+    override fun visitSuperInitializer(node: SuperInitializer) {
+        writeByte(Tags.SUPER_INITIALIZER)
+        writeBaseRedirectingInitializer(node)
+    }
+
+    override fun visitRedirectingInitializer(node: RedirectingInitializer) {
+        writeByte(Tags.REDIRECTING_INITIALIZER)
+        writeBaseRedirectingInitializer(node)
+    }
+
+    private fun writeBaseRedirectingInitializer(node: BaseRedirectingInitializer) {
+        writeBool(node.isSynthetic)
+        writeFileOffset(node.fileOffset)
+        writeReference(node.target)
+        writeArguments(node.arguments)
     }
 
     // Types

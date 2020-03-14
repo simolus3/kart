@@ -32,6 +32,8 @@ class FunctionNode(
     val namedParameters = children(namedParameters)
     val body by nullableChild<Statement?>(body)
 
+    val totalParameterCount get() = positionalParameters.size + namedParameters.size
+
     override fun <T> accept(visitor: TreeVisitor<T>): T {
         return visitor.visitFunctionNode(this)
     }

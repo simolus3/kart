@@ -10,6 +10,9 @@ object Tags {
     const val CONSTRUCTOR = 5u
     const val PROCEDURE = 6u
 
+    const val SUPER_INITIALIZER = 9u
+    const val REDIRECTING_INITIALIZER = 10u
+
     const val INVALID_EXPRESSION = 19u
     const val VARIABLE_GET = 20u
     const val VARIABLE_SET = 21u

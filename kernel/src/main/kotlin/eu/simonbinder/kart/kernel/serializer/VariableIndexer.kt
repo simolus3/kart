@@ -39,7 +39,7 @@ class VariableIndexer {
     }
 
     fun restoreScope(variableCount: Int) {
-        stackHeight = variableCount
+        stackHeight += variableCount
     }
 
     operator fun get(node: VariableDeclaration) = index[node]
