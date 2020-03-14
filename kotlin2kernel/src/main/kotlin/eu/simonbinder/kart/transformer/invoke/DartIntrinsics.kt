@@ -6,11 +6,15 @@ import eu.simonbinder.kart.kernel.expressions.*
 import eu.simonbinder.kart.kernel.types.*
 import eu.simonbinder.kart.transformer.names.ImportantDartNames
 import eu.simonbinder.kart.transformer.withIrOffsets
+import eu.simonbinder.kart.transformer.withNullabilityOfIr
+import org.jetbrains.kotlin.backend.common.ir.classIfConstructor
 import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
 import org.jetbrains.kotlin.ir.expressions.IrCall
+import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.util.SymbolTable
+import org.jetbrains.kotlin.ir.util.constructedClass
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 
@@ -27,6 +31,10 @@ class DartIntrinsics (
         irBuiltIns.intType,
         irBuiltIns.longType
     )
+
+    fun isDefaultObjectConstructor(call: IrDelegatingConstructorCall): Boolean {
+        return call.symbol.owner.constructedClass.symbol == irBuiltIns.anyClass
+    }
 
     fun intrinsicCall(call: IrCall, exprCompiler: (IrExpression) -> Expression): Expression? {
         fun getCompiled(index: Int): Expression {
@@ -121,7 +129,7 @@ class DartIntrinsics (
         }
     }
 
-    fun intrinsicType(type: IrType): DartType {
+    fun intrinsicType(type: IrType): DartType? {
         if (type is IrDynamicType) return DynamicType
 
         return when(type.classOrNull) {
@@ -143,14 +151,7 @@ class DartIntrinsics (
                     dartNames.objectType
                 }
             }
-            else -> throw IllegalArgumentException("Cannot map ${type.classOrNull?.descriptor?.fqNameOrNull() ?: type} to Dart")
+            else -> null
         }
-    }
-
-    private fun DartType.withNullabilityOfIr(type: IrType): DartType {
-        if (this !is InterfaceType) return this
-
-        val nullable = (type as? IrSimpleType)?.hasQuestionMark ?: false
-        return withNullability(if (nullable) Nullability.NULLABLE else Nullability.NON_NULLABLE)
     }
 }

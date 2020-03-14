@@ -128,6 +128,7 @@ class CanonicalName private constructor(
         const val GETTERS = "@getters"
         const val SETTERS = "@setters"
         const val METHODS = "@methods"
+        const val CONSTRUCTORS = "@constructors"
     }
 }
 

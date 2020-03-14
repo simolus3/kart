@@ -353,7 +353,7 @@ class KernelSerializer(
         writeList(node.implementedClasses, this::writeType)
 
         writeList(node.fields) { it.accept(this) }
-        writeUint(0u) // constructors
+        writeList(node.constructors) { it.accept(this) }
         val procedureOffsets = writeNodesAndCollectOffsets(node.procedures)
         writeUint(0u) // redirecting factory constructors
         writeOffsetsFollowedByCountAsUint32(procedureOffsets)

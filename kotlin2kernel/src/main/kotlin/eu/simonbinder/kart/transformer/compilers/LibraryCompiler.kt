@@ -56,7 +56,7 @@ object LibraryCompiler : BaseMemberCompiler<InLibraryContext>() {
     }
 
     override fun visitFunction(declaration: IrFunction, data: InLibraryContext) {
-        val procedure = compileFunction(declaration, data)
+        val procedure = compileProcedure(declaration, data)
         data.target.members.add(procedure)
 
         if (declaration.isMain()) {

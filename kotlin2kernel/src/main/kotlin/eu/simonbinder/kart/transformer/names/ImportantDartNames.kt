@@ -1,6 +1,8 @@
 package eu.simonbinder.kart.transformer.names
 
 import eu.simonbinder.kart.kernel.CanonicalName
+import eu.simonbinder.kart.kernel.CanonicalName.Companion.CONSTRUCTORS
+import eu.simonbinder.kart.kernel.CanonicalName.Companion.METHODS
 import eu.simonbinder.kart.kernel.asReference
 import eu.simonbinder.kart.kernel.types.InterfaceType
 
@@ -18,19 +20,21 @@ class ImportantDartNames(private val root: CanonicalName) {
     val stringType = InterfaceType(classReference = dartCore.getChild("String").asReference())
     val objectType = InterfaceType(classReference = objectName.asReference())
 
-    val dartPrint = dartCore.getChild("@methods").getChild("print").asReference()
-    val objectEquals = objectName.getChild("@methods").getChild("==").asReference()
-    val identical = dartCore.getChild("@methods").getChild("identical").asReference()
+    val objectDefaultConstructor = objectName.getChild(CONSTRUCTORS).getChild("")
 
-    val numPlus = numName.getChild("@methods").getChild("+").asReference()
-    val numMinus = numName.getChild("@methods").getChild("-").asReference()
-    val numTimes = numName.getChild("@methods").getChild("*").asReference()
-    val numTruncatingDivision = numName.getChild("@methods").getChild("~/").asReference()
-    val numMod = numName.getChild("@methods").getChild("%").asReference()
-    val intAnd = intName.getChild("@methods").getChild("&").asReference()
+    val dartPrint = dartCore.getChild(METHODS).getChild("print").asReference()
+    val objectEquals = objectName.getChild(METHODS).getChild("==").asReference()
+    val identical = dartCore.getChild(METHODS).getChild("identical").asReference()
 
-    val numLess = numName.getChild("@methods").getChild("<").asReference()
-    val numLessEq = numName.getChild("@methods").getChild("<=").asReference()
-    val numMore = numName.getChild("@methods").getChild(">").asReference()
-    val numMoreEq = numName.getChild("@methods").getChild(">=").asReference()
+    val numPlus = numName.getChild(METHODS).getChild("+").asReference()
+    val numMinus = numName.getChild(METHODS).getChild("-").asReference()
+    val numTimes = numName.getChild(METHODS).getChild("*").asReference()
+    val numTruncatingDivision = numName.getChild(METHODS).getChild("~/").asReference()
+    val numMod = numName.getChild(METHODS).getChild("%").asReference()
+    val intAnd = intName.getChild(METHODS).getChild("&").asReference()
+
+    val numLess = numName.getChild(METHODS).getChild("<").asReference()
+    val numLessEq = numName.getChild(METHODS).getChild("<=").asReference()
+    val numMore = numName.getChild(METHODS).getChild(">").asReference()
+    val numMoreEq = numName.getChild(METHODS).getChild(">=").asReference()
 }

@@ -14,6 +14,7 @@ import org.jetbrains.kotlin.ir.declarations.IrField
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
+import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.isGetter
 import org.jetbrains.kotlin.ir.util.isSetter
@@ -30,13 +31,14 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
     protected abstract val isStatic: Boolean
 
     override fun visitFunction(declaration: IrFunction, data: T) {
-        val procedure = compileFunction(declaration, data)
+        val procedure = compileProcedure(declaration, data)
         data.target.members.add(procedure)
     }
 
-    protected fun compileFunction(declaration: IrFunction, data: T): Procedure {
-        val dartReference = data.names.nameFor(declaration)
-
+    protected fun createBodyContextAndParams(
+        declaration: IrFunction,
+        data: T
+    ): Pair<InBodyCompilationContext, List<VariableDeclaration>> {
         val contextForBody = data.toBody()
 
         val parameters = declaration.valueParameters
@@ -44,12 +46,36 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
             .map {
                 val dartVariable = VariableDeclaration(
                     name = it.name.identifierOrNull,
-                    type = data.info.dartIntrinsics.intrinsicType(it.type)
+                    type = data.info.dartTypeFor(it.type)
                 )
                 dartVariable.isFinal = true
                 contextForBody.variables[it.symbol] = dartVariable
                 dartVariable
             }
+
+        return contextForBody to parameters
+    }
+
+    protected fun compileFunctionNode(
+        declaration: IrFunction,
+        data: T,
+        overrideBody: IrBody? = declaration.body
+    ): FunctionNode {
+        val (contextForBody, parameters) = createBodyContextAndParams(declaration, data)
+
+        return FunctionNode(
+            body = overrideBody?.accept(BodyCompiler, contextForBody),
+            positionalParameters = parameters,
+            returnType = data.info.dartTypeFor(declaration.returnType)
+        ).also {
+            it.fileOffset = declaration.startOffset
+            it.endOffset = declaration.endOffset
+        }
+    }
+
+    protected fun compileProcedure(declaration: IrFunction, data: T): Procedure {
+        val dartReference = data.names.nameFor(declaration)
+        val function = compileFunctionNode(declaration, data)
 
         val kind = when {
             declaration.isGetter -> ProcedureKind.GETTER
@@ -59,14 +85,7 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
 
         val procedure = Procedure(
             kind = kind,
-            function = FunctionNode(
-                body = declaration.body?.accept(BodyCompiler, contextForBody),
-                positionalParameters = parameters,
-                returnType = data.info.dartIntrinsics.intrinsicType(declaration.returnType)
-            ).also {
-                it.fileOffset = declaration.startOffset
-                it.endOffset = declaration.endOffset
-            },
+            function = function,
             name = data.info.names.simpleNameFor(declaration),
             reference = dartReference
         )

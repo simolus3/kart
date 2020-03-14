@@ -4,6 +4,7 @@ import eu.simonbinder.kart.kernel.CanonicalName
 import eu.simonbinder.kart.kernel.Name as DartName
 import eu.simonbinder.kart.kernel.Reference
 import eu.simonbinder.kart.kernel.asReference
+import eu.simonbinder.kart.transformer.identifierOrNull
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.name.Name
@@ -21,23 +22,25 @@ class Names {
         val library = nameFor(declaration.file)
         val baseName = library.canonicalName!!
 
-        val name = if (declaration is IrField) {
-            // In Kernel, Fields and getters/setters are weirdly mixed up (one can use a StaticGet that refers to a
-            // getter, for instance). To cleanly separate fields and their accessors, we always suffix the field.
-            baseName.getChild(CanonicalName.FIELDS).getChild(declaration.name.identifier + "_field")
-        } else if (declaration is IrSimpleFunction) {
-            if (declaration.isGetter || declaration.isSetter) {
-                val nameOfField = declaration.correspondingPropertySymbol!!.descriptor.name.identifier
-                baseName
-                    .getChild(if (declaration.isGetter) CanonicalName.GETTERS else CanonicalName.SETTERS)
-                    .getChild(nameOfField)
-            } else {
-                baseName.getChild(CanonicalName.METHODS).getChild(declaration.name.identifier)
+        val name = when (declaration) {
+            is IrField -> {
+                // In Kernel, Fields and getters/setters are weirdly mixed up (one can use a StaticGet that refers to a
+                // getter, for instance). To cleanly separate fields and their accessors, we always suffix the field.
+                baseName.getChild(CanonicalName.FIELDS).getChild(declaration.name.identifier + "_field")
             }
-        } else if (declaration is IrClass) {
-            baseName.getChild(declaration.name.identifier)
-        } else {
-            TODO()
+            is IrSimpleFunction -> {
+                if (declaration.isGetter || declaration.isSetter) {
+                    val nameOfField = declaration.correspondingPropertySymbol!!.descriptor.name.identifier
+                    baseName
+                        .getChild(if (declaration.isGetter) CanonicalName.GETTERS else CanonicalName.SETTERS)
+                        .getChild(nameOfField)
+                } else {
+                    baseName.getChild(CanonicalName.METHODS).getChild(declaration.name.identifier)
+                }
+            }
+            is IrClass -> baseName.getChild(declaration.name.identifier)
+            is IrConstructor -> baseName.getChild(CanonicalName.CONSTRUCTORS).getChild(declaration.name.identifierOrNull ?: "")
+            else -> TODO()
         }
 
         name.asReference()
