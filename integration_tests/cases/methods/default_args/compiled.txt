@@ -1,13 +1,13 @@
 main = roo::main;
 library from "rootKt" as roo {
 
-  method main() → void {
+  static method main() → void {
     roo::foo$default(0, 3, 1);
   }
-  method foo(final core::int i, final core::int j) → void {
+  static method foo(final core::int i, final core::int j) → void {
     core::print("i = ${i}, j = ${j}");
   }
-  method foo$default(final core::int i, final core::int j, final core::int $mask0) → void {
+  static method foo$default(final core::int i, final core::int j, final core::int $mask0) → void {
     final core::int i = !$mask0.{core::int::&}(1).{core::Object::==}(0) ? 3 : i;
     final core::int j = j;
     return roo::foo(i, j);

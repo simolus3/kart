@@ -16,10 +16,13 @@ object Tags {
     const val INVALID_EXPRESSION = 19u
     const val VARIABLE_GET = 20u
     const val VARIABLE_SET = 21u
+    const val PROPERTY_GET = 22u
+    const val PROPERTY_SET = 23u
     const val STATIC_GET = 26u
     const val STATIC_SET = 27u
     const val METHOD_INVOCATION = 28u
     const val STATIC_INVOCATION = 30u
+    const val CONSTRUCTOR_INVOCATION = 31u
     const val NOT = 33u
     const val LOGICAL_EXPRESSION = 34u
     const val CONDITIONAL_EXPRESSION = 35u
@@ -31,6 +34,7 @@ object Tags {
     const val TRUE_LITERAL = 41u
     const val FALSE_LITERAL = 42u
     const val NULL_LITERAL = 43u
+    const val THIS = 46u
     const val THROW = 48u
     const val POSITIVE_INT_LITERAL = 55u
     const val NEGATIVE_INT_LITERAL = 56u

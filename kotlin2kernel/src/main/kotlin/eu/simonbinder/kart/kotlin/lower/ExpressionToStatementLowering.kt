@@ -207,18 +207,22 @@ private class ExpressionToSetVariableTransformer(
 
     private fun createTemporaryVariable(type: IrType): IrVariable {
         val name = "tmp_${tmpVarCount++}"
+        val descriptor = WrappedVariableDescriptor()
+        val symbol = IrVariableSymbolImpl(descriptor)
 
         return IrVariableImpl(
             -1, // start and end offset
             -1,
             IrDeclarationOrigin.IR_TEMPORARY_VARIABLE,
-            IrVariableSymbolImpl(WrappedVariableDescriptor()),
+            symbol,
             Name.identifier(name),
             type,
             true, // mutable
             isConst = false,
             isLateinit = true
-        )
+        ).also {
+            descriptor.bind(it)
+        }
     }
 
 }

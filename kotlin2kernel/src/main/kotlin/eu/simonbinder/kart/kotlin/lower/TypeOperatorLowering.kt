@@ -12,6 +12,8 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrTypeOperatorCallImpl
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 
+object NotInstanceOfOrigin : IrStatementOriginImpl("NOT_INSTANCEOF")
+
 class TypeOperatorLowering(val context: DartBackendContext): FunctionLoweringPass {
     override fun lower(irFunction: IrFunction) {
         val builder = context.createIrBuilder(irFunction.symbol)
@@ -33,7 +35,7 @@ class TypeOperatorLowering(val context: DartBackendContext): FunctionLoweringPas
                             expression.startOffset, expression.endOffset,
                             context.irBuiltIns.booleanNotSymbol,
                             context.irBuiltIns.booleanType,
-                            IrStatementOrigin.NOT_IN, // todo: What's the right origin here? Certainly not NOT_IN
+                            NotInstanceOfOrigin,
                             IrTypeOperatorCallImpl(
                                 expression.startOffset,
                                 expression.endOffset,

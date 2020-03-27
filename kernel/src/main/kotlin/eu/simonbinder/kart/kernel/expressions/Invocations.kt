@@ -81,3 +81,19 @@ class MethodInvocation(
         arguments.accept(visitor)
     }
 }
+
+class ConstructorInvocation(
+    var reference: Reference? = null,
+    arguments: Arguments? = null
+): Expression() {
+
+    var arguments: Arguments by child(arguments)
+
+    override fun <T> accept(visitor: TreeVisitor<T>): T {
+        return visitor.visitConstructorInvocation(this)
+    }
+
+    override fun <T> visitChildren(visitor: TreeVisitor<T>) {
+        arguments.accept(visitor)
+    }
+}

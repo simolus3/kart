@@ -93,6 +93,7 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
         procedure.startFileOffset = declaration.startOffset
         procedure.fileOffset = declaration.startOffset
         procedure.fileEndOffset = declaration.endOffset
+        procedure.isStatic = isStatic
 
         return procedure
     }
@@ -111,8 +112,15 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
             fileUri = data.info.loadFile(declaration.file)
         )
 
-        field.isFinal = declaration.isFinal
-        field.isStatic = true
+        // Not making non-static fields final because they're commonly accessed in the constructor body.
+        val isFinal = isStatic && declaration.isFinal
+        field.isFinal = isFinal
+        field.isStatic = isStatic
+
+        // we can't access non-static fields at all if they don't have an implicit getter / setter. We're generating a
+        // proper getter / setter from Kotlin, but those have a different name.
+        field.hasImplicitSetter = !isStatic && !isFinal
+        field.hasImplicitGetter = !isStatic
 
         data.target.members.add(field)
     }

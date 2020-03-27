@@ -3,23 +3,23 @@ library from "rootKt" as roo {
 
   static field core::String fieldOnly_field = "Hello world!";
   static field core::int fieldWithAccessors_field = 3;
-  get fieldOnly() → core::String {
+  static get fieldOnly() → core::String {
     return roo::fieldOnly_field;
   }
-  set fieldOnly(final core::String #t1) → void {
+  static set fieldOnly(final core::String #t1) → void {
     roo::fieldOnly_field = #t1;
   }
-  get fieldWithAccessors() → core::int {
+  static get fieldWithAccessors() → core::int {
     return roo::fieldWithAccessors_field.{core::num::+}(2);
   }
-  set fieldWithAccessors(final core::int value) → void {
+  static set fieldWithAccessors(final core::int value) → void {
     roo::fieldWithAccessors_field = value.{core::num::*}(2);
   }
-  get noField() → core::String {
+  static get noField() → core::String {
     return "hi";
   }
-  set noField(final core::String value) → void {}
-  method main() → void {
+  static set noField(final core::String value) → void {}
+  static method main() → void {
     core::print(roo::fieldOnly);
     roo::fieldWithAccessors = 15;
     core::print(roo::fieldWithAccessors);

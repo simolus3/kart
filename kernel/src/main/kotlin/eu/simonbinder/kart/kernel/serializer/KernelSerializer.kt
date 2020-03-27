@@ -402,7 +402,7 @@ class KernelSerializer(
             writeFileOffset(node.fileOffset)
             writeFileOffset(node.fileEndOffset)
             writeByte(node.kind.ordinal.toUInt())
-            writeUint(0u) // flags
+            writeUint(node.flags.toUInt())
             visitName(node.name ?: emptyName)
             writeUint(0u) // annotations
             writeReference(null) // forwarding stub super target reference
@@ -559,6 +559,10 @@ class KernelSerializer(
         writeList(node.expressions, this::writeExpression)
     }
 
+    override fun visitThis(node: This) {
+        writeByte(Tags.THIS)
+    }
+
     override fun visitThrow(node: Throw) {
         writeByte(Tags.THROW)
         writeFileOffset(node.fileOffset)
@@ -621,6 +625,23 @@ class KernelSerializer(
         writeArguments(node.arguments)
     }
 
+    override fun visitPropertyGet(node: PropertyGet) {
+        writeByte(Tags.PROPERTY_GET)
+        writeFileOffset(node.fileOffset)
+        writeExpression(node.receiver)
+        writeName(node.name)
+        writeReference(node.interfaceTarget)
+    }
+
+    override fun visitPropertySet(node: PropertySet) {
+        writeByte(Tags.PROPERTY_SET)
+        writeFileOffset(node.fileOffset)
+        writeExpression(node.receiver)
+        writeName(node.name)
+        writeExpression(node.value)
+        writeReference(node.interfaceTarget)
+    }
+
     override fun visitMethodInvocation(node: MethodInvocation) {
         writeByte(Tags.METHOD_INVOCATION)
         writeFileOffset(node.fileOffset)
@@ -628,6 +649,13 @@ class KernelSerializer(
         writeName(node.name)
         writeArguments(node.arguments)
         writeReference(node.reference)
+    }
+
+    override fun visitConstructorInvocation(node: ConstructorInvocation) {
+        writeByte(Tags.CONSTRUCTOR_INVOCATION)
+        writeFileOffset(node.fileOffset)
+        writeReference(node.reference)
+        writeArguments(node.arguments)
     }
 
     private fun writeArguments(args: Arguments) {

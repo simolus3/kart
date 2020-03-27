@@ -1,0 +1,30 @@
+main = inp::main;
+library from "input" as inp {
+
+  class TreeNode extends core::Object {
+    field core::int data_field;
+    field inp::TreeNode? left_field;
+    field inp::TreeNode? right_field;
+    constructor •(final core::int data, final inp::TreeNode? left, final inp::TreeNode? right) → inp::TreeNode
+      : super core::Object::•() {
+      {
+        this.{inp::TreeNode::data_field} = data;
+        this.{inp::TreeNode::left_field} = left;
+        this.{inp::TreeNode::right_field} = right;
+      }
+    }
+    get data() → core::int {
+      return this.{inp::TreeNode::data_field};
+    }
+    get left() → inp::TreeNode? {
+      return this.{inp::TreeNode::left_field};
+    }
+    get right() → inp::TreeNode? {
+      return this.{inp::TreeNode::right_field};
+    }
+  }
+  static method main() → void {
+    final inp::TreeNode x = new inp::TreeNode::•(2, null, null);
+    core::print(x.{inp::TreeNode::data});
+  }
+}

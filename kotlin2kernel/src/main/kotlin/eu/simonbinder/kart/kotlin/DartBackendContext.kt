@@ -67,7 +67,7 @@ class DartBackendContext(
             override val coroutineSuspendedGetter: IrSimpleFunctionSymbol
                 get() = TODO("not implemented")
             override val defaultConstructorMarker: IrClassSymbol
-                get() = TODO("not implemented")
+                get() = irBuiltIns.anyClass
             override val getContinuation: IrSimpleFunctionSymbol
                 get() = TODO("not implemented")
             override val returnIfSuspended: IrSimpleFunctionSymbol

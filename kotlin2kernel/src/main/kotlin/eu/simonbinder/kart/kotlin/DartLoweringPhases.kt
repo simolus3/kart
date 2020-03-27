@@ -1,9 +1,6 @@
 package eu.simonbinder.kart.kotlin
 
-import eu.simonbinder.kart.kotlin.lower.DartDefaultArgumentStubGenerator
-import eu.simonbinder.kart.kotlin.lower.ExpressionToStatementLowering
-import eu.simonbinder.kart.kotlin.lower.PrimitiveTypeLowering
-import eu.simonbinder.kart.kotlin.lower.TypeOperatorLowering
+import eu.simonbinder.kart.kotlin.lower.*
 import org.jetbrains.kotlin.backend.common.CommonBackendContext
 import org.jetbrains.kotlin.backend.common.lower.*
 import org.jetbrains.kotlin.backend.common.lower.inline.FunctionInlining
@@ -70,6 +67,12 @@ private val initializersLoweringPhase = makeIrModulePhase(
     { context: DartBackendContext -> InitializersLowering(context, DartDeclarationOrigin.LOWERED_INIT_BLOCK, false) },
     name = "Initializers",
     description = "Lower initializers"
+)
+
+private val cleanRemovedInitializersLowering = makeIrModulePhase<DartBackendContext>(
+    { CleanRemovedInitializersLowering() },
+    name = "CleanRemovedInitializersLowering",
+    description = "Remove initializers that were transformed to the constructor"
 )
 
 private val defaultArgumentStubGeneratorPhase = makeIrModulePhase(
@@ -140,6 +143,7 @@ val dartPhases = namedIrModulePhase(
             innerClassConstructorCallsLoweringPhase then
             propertiesLoweringPhase then
             initializersLoweringPhase then
+            cleanRemovedInitializersLowering then
             defaultArgumentStubGeneratorPhase then
             defaultParameterInjectorPhase then
             defaultParameterCleanerPhase then

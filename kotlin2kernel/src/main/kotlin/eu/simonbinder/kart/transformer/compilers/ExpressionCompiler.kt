@@ -6,13 +6,10 @@ import eu.simonbinder.kart.transformer.context.InBodyCompilationContext
 import eu.simonbinder.kart.transformer.context.names
 import eu.simonbinder.kart.transformer.identifierOrNull
 import eu.simonbinder.kart.transformer.withIrOffsets
-import org.jetbrains.kotlin.backend.common.serialization.proto.IrTypeOp
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.expressions.*
-import org.jetbrains.kotlin.ir.util.getPackageFragment
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
 import org.jetbrains.kotlin.utils.addToStdlib.cast
-import kotlin.math.exp
 
 object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContext> {
 
@@ -44,6 +41,14 @@ object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContex
         else -> throw NotImplementedError("Constant should have been desugared to Long or Double: $expression")
     }
 
+    private fun IrMemberAccessExpression.arguments(data: InBodyCompilationContext): Arguments {
+        return Arguments(
+            positional = List(valueArgumentsCount) { index ->
+                getValueArgument(index)!!.accept(this@ExpressionCompiler, data)
+            }
+        )
+    }
+
     override fun visitCall(expression: IrCall, data: InBodyCompilationContext): Expression {
         var intrinsic = data.info.dartIntrinsics.intrinsicCall(expression) {
             it.accept(this, data)
@@ -53,11 +58,7 @@ object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContex
         // temporarily implement some more calls as intrinsics
         intrinsic = when (expression.symbol.descriptor.name.identifierOrNull) {
             "println" -> {
-                val args = Arguments(
-                    positional = List(expression.valueArgumentsCount) { index ->
-                        expression.getValueArgument(index)!!.accept(this, data)
-                    }
-                )
+                val args = expression.arguments(data)
 
                 val printName = data.names.root.getChild("dart:core").getChild("@methods").getChild("print")
                 StaticInvocation(Reference(printName), args)
@@ -69,27 +70,61 @@ object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContex
         val dartFunctionReference = data.names.nameFor(expression.symbol.owner)
         val canonicalName = dartFunctionReference.canonicalName!!
 
-        return when {
-            canonicalName.isGetter -> StaticGet(dartFunctionReference)
-            canonicalName.isSetter -> StaticSet(dartFunctionReference, expression.getValueArgument(0)!!.accept(this, data))
-            canonicalName.isNonPropertyAccessorMethod -> StaticInvocation(dartFunctionReference, Arguments(
-                positional = List(expression.valueArgumentsCount) { index ->
-                    expression.getValueArgument(index)!!.accept(this, data)
+        return if (expression.dispatchReceiver == null) {
+            // Static call
+            when {
+                canonicalName.isGetter -> StaticGet(dartFunctionReference)
+                canonicalName.isSetter -> StaticSet(dartFunctionReference, expression.getValueArgument(0)!!.accept(this, data))
+                canonicalName.isNonPropertyAccessorMethod -> StaticInvocation(dartFunctionReference, expression.arguments(data))
+                else -> throw UnsupportedOperationException("Did not expect a call to $canonicalName")
+            }
+        } else {
+            // Virtual call
+            val dartReceiver = expression.dispatchReceiver!!.accept(this, data)
+            val name = data.names.simpleNameFor(expression.symbol.owner)
+
+            when {
+                canonicalName.isGetter -> PropertyGet(dartReceiver, name, dartFunctionReference)
+                canonicalName.isSetter -> {
+                    val value = expression.getValueArgument(0)!!.accept(this, data)
+                    PropertySet(dartReceiver, name, value, dartFunctionReference)
                 }
-            ))
-            else -> throw UnsupportedOperationException("Did not expect a call to $canonicalName")
+                canonicalName.isNonPropertyAccessorMethod -> StaticInvocation(dartFunctionReference, expression.arguments(data))
+                else -> throw UnsupportedOperationException("Did not expect a call to $canonicalName")
+            }
         }.withIrOffsets(expression)
     }
 
+    override fun visitConstructorCall(expression: IrConstructorCall, data: InBodyCompilationContext): Expression {
+        return ConstructorInvocation(
+            reference = data.names.nameFor(expression.symbol.owner),
+            arguments = expression.arguments(data)
+        )
+    }
+
     override fun visitGetField(expression: IrGetField, data: InBodyCompilationContext): Expression {
-        val dartField = data.names.nameFor(expression.symbol.owner)
-        return StaticGet(dartField).withIrOffsets(expression)
+        val field = expression.symbol.owner
+        val dartField = data.names.nameFor(field)
+
+        return if (field.isStatic) {
+            StaticGet(dartField)
+        } else {
+            val name = data.names.simpleNameFor(field)
+            PropertyGet(expression.receiver!!.accept(this, data), name, dartField)
+        }.withIrOffsets(expression)
     }
 
     override fun visitSetField(expression: IrSetField, data: InBodyCompilationContext): Expression {
-        val dartField = data.names.nameFor(expression.symbol.owner)
+        val field = expression.symbol.owner
+        val dartField = data.names.nameFor(field)
         val value = expression.value.accept(this, data)
-        return StaticSet(dartField, value).withIrOffsets(expression)
+
+        return if (field.isStatic) {
+            StaticSet(dartField, value)
+        } else {
+            val name = data.names.simpleNameFor(field)
+            PropertySet(expression.receiver!!.accept(this, data), name, value, dartField)
+        }.withIrOffsets(expression)
     }
 
     override fun visitTypeOperator(expression: IrTypeOperatorCall, data: InBodyCompilationContext): Expression {
@@ -116,6 +151,11 @@ object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContex
     }
 
     override fun visitGetValue(expression: IrGetValue, data: InBodyCompilationContext): Expression {
+        if (expression.descriptor.name.asString() == "<this>") {
+            // todo there has to be a better way to detect whether expression refers to `this`
+            return This
+        }
+
         val kernelDeclaration = data.variables[expression.symbol]
             ?: throw IllegalStateException("GetValue $expression referred to an unknown variable")
 

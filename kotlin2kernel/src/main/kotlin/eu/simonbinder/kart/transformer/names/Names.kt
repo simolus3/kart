@@ -20,7 +20,11 @@ class Names {
     fun nameFor(declaration: IrDeclaration): Reference = declarationToName.computeIfAbsent(declaration) {
         // todo support class members
         val library = nameFor(declaration.file)
-        val baseName = library.canonicalName!!
+        val baseName = if (declaration.parent is IrClass) {
+            nameFor(declaration.parentAsClass).canonicalName!!
+        } else {
+            library.canonicalName!!
+        }
 
         val name = when (declaration) {
             is IrField -> {

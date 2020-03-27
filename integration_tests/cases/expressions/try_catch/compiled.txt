@@ -1,7 +1,7 @@
 main = roo::main;
 library from "rootKt" as roo {
 
-  method main() → void {
+  static method main() → void {
     final core::int x = block {
       late core::int tmp_0;
       try {

@@ -20,12 +20,7 @@ object BodyCompiler : IrElementVisitor<Statement, InBodyCompilationContext> {
     }
 
     override fun visitExpression(expression: IrExpression, data: InBodyCompilationContext): Statement {
-        return ExpressionStatement(
-            compileExpression(
-                expression,
-                data
-            )
-        )
+        return ExpressionStatement(compileExpression(expression, data))
     }
 
     override fun visitBlock(expression: IrBlock, data: InBodyCompilationContext): Statement {

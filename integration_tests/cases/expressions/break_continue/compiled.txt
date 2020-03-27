@@ -1,7 +1,7 @@
 main = roo::main;
 library from "rootKt" as roo {
 
-  method main() → void {
+  static method main() → void {
     core::int x = 0;
     #L1:
     while (true)

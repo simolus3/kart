@@ -23,9 +23,13 @@ interface ExpressionVisitor<R> {
     // Invocations
 
     fun visitStaticInvocation(node: StaticInvocation): R = defaultExpression(node)
+    fun visitMethodInvocation(node: MethodInvocation): R = defaultExpression(node)
+    fun visitConstructorInvocation(node: ConstructorInvocation): R = defaultExpression(node)
+
     fun visitStaticGet(node: StaticGet): R = defaultExpression(node)
     fun visitStaticSet(node: StaticSet): R = defaultExpression(node)
-    fun visitMethodInvocation(node: MethodInvocation): R = defaultExpression(node)
+    fun visitPropertyGet(node: PropertyGet): R = defaultExpression(node)
+    fun visitPropertySet(node: PropertySet): R = defaultExpression(node)
 
     // Variables
 
@@ -43,5 +47,6 @@ interface ExpressionVisitor<R> {
     fun visitBlockExpression(node: BlockExpression): R = defaultExpression(node)
     fun visitStringConcatenation(node: StringConcatenation): R = defaultExpression(node)
     fun visitInvalidExpression(node: InvalidExpression): R = defaultExpression(node)
+    fun visitThis(node: This): R = defaultExpression(node)
     fun visitThrow(node: Throw): R = defaultExpression(node)
 }
