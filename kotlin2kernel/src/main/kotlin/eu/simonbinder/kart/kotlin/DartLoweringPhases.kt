@@ -75,6 +75,18 @@ private val cleanRemovedInitializersLowering = makeIrModulePhase<DartBackendCont
     description = "Remove initializers that were transformed to the constructor"
 )
 
+private val extensionReceiverLoweringPhase = makeIrModulePhase<DartBackendContext>(
+    { ExtensionDeclarationLowering() },
+    name = "ExtensionDeclarationLowering",
+    description = "Eliminate the extension parameter from extension functions"
+)
+
+private val extensionReceiverCallSiteLoweringPhase = makeIrModulePhase<DartBackendContext>(
+    { ExtensionCallSiteLowering() },
+    name = "ExtensionCallSiteLowering",
+    description = "Rewrite extension member invocations"
+)
+
 private val defaultArgumentStubGeneratorPhase = makeIrModulePhase(
     ::DartDefaultArgumentStubGenerator,
     name = "DefaultArgumentStubGenerator",
@@ -144,6 +156,8 @@ val dartPhases = namedIrModulePhase(
             propertiesLoweringPhase then
             initializersLoweringPhase then
             cleanRemovedInitializersLowering then
+            extensionReceiverLoweringPhase then
+            extensionReceiverCallSiteLoweringPhase then
             defaultArgumentStubGeneratorPhase then
             defaultParameterInjectorPhase then
             defaultParameterCleanerPhase then

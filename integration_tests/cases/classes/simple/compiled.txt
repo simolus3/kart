@@ -1,30 +1,68 @@
 main = inp::main;
 library from "input" as inp {
 
-  class TreeNode extends core::Object {
-    field core::int data_field;
-    field inp::TreeNode? left_field;
-    field inp::TreeNode? right_field;
-    constructor •(final core::int data, final inp::TreeNode? left, final inp::TreeNode? right) → inp::TreeNode
+  class BinaryTree extends core::Object {
+    field core::int value_field;
+    field inp::BinaryTree? left_field;
+    field inp::BinaryTree? right_field;
+    constructor •(final core::int value, final inp::BinaryTree? left, final inp::BinaryTree? right) → inp::BinaryTree
       : super core::Object::•() {
       {
-        this.{inp::TreeNode::data_field} = data;
-        this.{inp::TreeNode::left_field} = left;
-        this.{inp::TreeNode::right_field} = right;
+        this.{inp::BinaryTree::value_field} = value;
+        this.{inp::BinaryTree::left_field} = left;
+        this.{inp::BinaryTree::right_field} = right;
       }
     }
-    get data() → core::int {
-      return this.{inp::TreeNode::data_field};
+    get value() → core::int {
+      return this.{inp::BinaryTree::value_field};
     }
-    get left() → inp::TreeNode? {
-      return this.{inp::TreeNode::left_field};
+    get left() → inp::BinaryTree? {
+      return this.{inp::BinaryTree::left_field};
     }
-    get right() → inp::TreeNode? {
-      return this.{inp::TreeNode::right_field};
+    get right() → inp::BinaryTree? {
+      return this.{inp::BinaryTree::right_field};
     }
   }
+  static method search(final inp::BinaryTree $this, final core::int key) → inp::BinaryTree? {
+    inp::BinaryTree $this = $this;
+    core::int key = key;
+    #L1:
+    while (true)
+      #L2:
+      {
+        final inp::BinaryTree $this = $this;
+        final core::int key = key;
+        return block {
+          late inp::BinaryTree? tmp_0;
+          if($this.{inp::BinaryTree::value}.{core::Object::==}(key))
+            tmp_0 = $this;
+          else
+            if(key.{core::num::<}($this.{inp::BinaryTree::value})) {
+              final inp::BinaryTree? tmp0_safe_receiver = $this.{inp::BinaryTree::left};
+              tmp_0 = tmp0_safe_receiver.{core::Object::==}(null) ? null : block {
+                $this = tmp0_safe_receiver;
+                key = key;
+              } => block {
+                lateNever? tmp_1;
+                break #L2;
+              } =>tmp_1;
+            }
+            else {
+              final inp::BinaryTree? tmp1_safe_receiver = $this.{inp::BinaryTree::right};
+              tmp_0 = tmp1_safe_receiver.{core::Object::==}(null) ? null : block {
+                $this = tmp1_safe_receiver;
+                key = key;
+              } => block {
+                lateNever? tmp_2;
+                break #L2;
+              } =>tmp_2;
+            }
+        } =>tmp_0;
+        break #L1;
+      }
+  }
   static method main() → void {
-    final inp::TreeNode x = new inp::TreeNode::•(2, null, null);
-    core::print(x.{inp::TreeNode::data});
+    final inp::BinaryTree node = new inp::BinaryTree::•(3, new inp::BinaryTree::•(2, null, null), new inp::BinaryTree::•(4, null, null));
+    core::print(inp::search(6));
   }
 }

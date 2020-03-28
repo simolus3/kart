@@ -99,7 +99,7 @@ object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContex
         return ConstructorInvocation(
             reference = data.names.nameFor(expression.symbol.owner),
             arguments = expression.arguments(data)
-        )
+        ).withIrOffsets(expression)
     }
 
     override fun visitGetField(expression: IrGetField, data: InBodyCompilationContext): Expression {
