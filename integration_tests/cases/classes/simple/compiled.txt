@@ -39,23 +39,23 @@ library from "input" as inp {
           else
             if(key.{core::num::<}($this.{inp::BinaryTree::value})) {
               final inp::BinaryTree? tmp0_safe_receiver = $this.{inp::BinaryTree::left};
-              tmp_0 = tmp0_safe_receiver.{core::Object::==}(null) ? null : block {
+              if(tmp0_safe_receiver.{core::Object::==}(null))
+                tmp_0 = null;
+              else {
                 $this = tmp0_safe_receiver;
                 key = key;
-              } => block {
-                lateNever? tmp_1;
                 break #L2;
-              } =>tmp_1;
+              }
             }
             else {
               final inp::BinaryTree? tmp1_safe_receiver = $this.{inp::BinaryTree::right};
-              tmp_0 = tmp1_safe_receiver.{core::Object::==}(null) ? null : block {
+              if(tmp1_safe_receiver.{core::Object::==}(null))
+                tmp_0 = null;
+              else {
                 $this = tmp1_safe_receiver;
                 key = key;
-              } => block {
-                lateNever? tmp_2;
                 break #L2;
-              } =>tmp_2;
+              }
             }
         } =>tmp_0;
         break #L1;

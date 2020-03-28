@@ -14,6 +14,7 @@ import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.symbols.impl.IrVariableSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
+import org.jetbrains.kotlin.js.parser.parseExpressionOrStatement
 import org.jetbrains.kotlin.name.Name
 
 class ExpressionToStatementLowering(private val context: DartBackendContext) : FunctionLoweringPass {
@@ -134,8 +135,11 @@ private class ExpressionToSetVariableTransformer(
         return aCatch
     }
 
-    override fun visitReturn(expression: IrReturn, data: ExpressionUsage) = expression.also {
-        it.value = it.value.transform(this, ExpressionUsage.INDEPENDENT_EXPRESSION)
+    override fun visitReturn(expression: IrReturn, data: ExpressionUsage): IrExpression {
+        return expression.transformToVariableSet(data, true) {
+            expression.value = expression.value.transform(this, it)
+            expression
+        }
     }
 
     override fun visitVariable(declaration: IrVariable, data: ExpressionUsage) = declaration.also {
@@ -152,7 +156,8 @@ private class ExpressionToSetVariableTransformer(
                 expression
             }
         } else {
-            super.visitWhen(expression, data)
+            expression.transformChildren(this, data)
+            expression
         }
     }
 
@@ -162,8 +167,8 @@ private class ExpressionToSetVariableTransformer(
         body: (usage: ExpressionUsage) -> IrExpression
     ): IrExpression {
         if (!data.valueIsUsed) {
-            // regular statement, nothing to apply here
-            transformChildren(this@ExpressionToSetVariableTransformer, data)
+            // regular statement, nothing to apply here. Children are likely to be used though
+            transformChildren(this@ExpressionToSetVariableTransformer, ExpressionUsage.INDEPENDENT_EXPRESSION)
             return this
         }
 
@@ -231,6 +236,13 @@ private class ExpressionUsage(
     val valueIsUsed: Boolean,
     val currentExpandingVariable: IrVariable? = null
 ) {
+
+    override fun toString(): String = when {
+        !valueIsUsed -> "ExpressionUsage.STATEMENT"
+        currentExpandingVariable == null -> "ExpressionUsage.INDEPENDENT_EXPRESSION"
+        else -> "ExpressionUsage (writing to $currentExpandingVariable)"
+    }
+
     companion object {
         val STATEMENT = ExpressionUsage(false)
         val INDEPENDENT_EXPRESSION = ExpressionUsage(true)
