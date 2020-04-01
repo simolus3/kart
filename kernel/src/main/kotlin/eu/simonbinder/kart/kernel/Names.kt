@@ -87,7 +87,7 @@ class CanonicalName private constructor(
     }
 
     fun bindTo(target: Reference) {
-        if (reference == target) return;
+        if (reference == target) return
         if (reference != null) {
             throw IllegalStateException("$this is already bound")
         }
@@ -104,6 +104,14 @@ class CanonicalName private constructor(
             it.canonicalName = null
         }
         reference = null
+    }
+
+    fun changeParent(to: String): CanonicalName {
+        return parent!!.parent!!.getChild(to).getChild(name)
+    }
+
+    fun sibling(name: String): CanonicalName {
+        return parent!!.getChild(name)
     }
 
     val isField get() = parent?.name == FIELDS
@@ -143,7 +151,11 @@ class Reference(var canonicalName: CanonicalName? = null) {
     val asField: Field? get() = node as Field
 }
 
-fun CanonicalName.asReference() = Reference(this)
+fun CanonicalName.asReference(): Reference {
+    reference?.let { return it }
+
+    return Reference().also { bindTo(it) }
+}
 
 class Name(
     val name: String,

@@ -7,9 +7,19 @@ import 'package:kernel/text/ast_to_text.dart';
 /// Reads a [Component] from stdin and serializes it to text. If a parameter is
 /// passed, its parsed as an int and serves as a maximum file size (in bytes).
 Future<void> main(List<String> args) async {
-  final bytes = args.isEmpty
-      ? await _readFromStdin()
-      : await _readFromStdin(int.parse(args.single));
+  Uint8List bytes;
+
+  if (args.isEmpty) {
+    bytes = await _readFromStdin();
+  } else {
+    final arg = args[0];
+
+    try {
+      bytes = await _readFromStdin(int.parse(arg));
+    } on FormatException {
+      bytes = await File(arg).readAsBytes();
+    }
+  }
 
   final component = loadComponentFromBytes(bytes);
   component.transformChildren(_RemoveSourceTransformer());

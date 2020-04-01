@@ -1,13 +1,21 @@
 package eu.simonbinder.kart.transformer.invoke
 
+import eu.simonbinder.kart.kernel.CanonicalName
 import eu.simonbinder.kart.kernel.Reference
+import eu.simonbinder.kart.kernel.asReference
 import eu.simonbinder.kart.kernel.Name as DartName
 import eu.simonbinder.kart.kernel.expressions.*
+import eu.simonbinder.kart.kernel.members.Procedure
+import eu.simonbinder.kart.kernel.members.ProcedureKind
 import eu.simonbinder.kart.kernel.types.*
+import eu.simonbinder.kart.transformer.identifierOrNull
 import eu.simonbinder.kart.transformer.names.ImportantDartNames
 import eu.simonbinder.kart.transformer.withIrOffsets
 import eu.simonbinder.kart.transformer.withNullabilityOfIr
 import org.jetbrains.kotlin.backend.common.ir.classIfConstructor
+import org.jetbrains.kotlin.ir.declarations.IrDeclaration
+import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
@@ -15,6 +23,8 @@ import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.util.SymbolTable
 import org.jetbrains.kotlin.ir.util.constructedClass
+import org.jetbrains.kotlin.ir.util.getSimpleFunction
+import org.jetbrains.kotlin.ir.util.overrides
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 
@@ -32,13 +42,44 @@ class DartIntrinsics (
         irBuiltIns.longType
     )
 
+    private val anyHashCode = irBuiltIns.anyClass.getSimpleFunction("hashCode")
+    private val anyEquals = irBuiltIns.anyClass.getSimpleFunction("equals")
+
     fun isDefaultObjectConstructor(call: IrDelegatingConstructorCall): Boolean {
         return call.symbol.owner.constructedClass.symbol == irBuiltIns.anyClass
+    }
+
+    fun applyIntrinsicProcedureName(procedure: Procedure, declaration: IrDeclaration) {
+        if (declaration !is IrSimpleFunction) return
+
+        if (anyHashCode in declaration.overriddenSymbols) {
+            procedure.kind = ProcedureKind.GETTER
+            procedure.name = DartName("hashCode")
+
+            val name = procedure.reference.canonicalName!!.changeParent(CanonicalName.GETTERS)
+            procedure.canonicalName = name
+        }
+        if (anyEquals in declaration.overriddenSymbols) {
+            procedure.name = DartName("==")
+
+            val name = procedure.reference.canonicalName!!.sibling("==")
+            procedure.canonicalName = name
+        }
     }
 
     fun intrinsicCall(call: IrCall, exprCompiler: (IrExpression) -> Expression): Expression? {
         fun getCompiled(index: Int): Expression {
             return exprCompiler(call.getValueArgument(index)!!)
+        }
+
+        when (call.symbol.descriptor.name.identifierOrNull) {
+            "hashCode" -> {
+                return PropertyGet(
+                    receiver = exprCompiler(call.dispatchReceiver!!),
+                    name = DartName("hashCode"),
+                    interfaceTarget = dartNames.objectHashCode.asReference()
+                )
+            }
         }
 
         if (call.dispatchReceiver?.type in kotlinIntTypes) {

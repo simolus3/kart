@@ -18,7 +18,6 @@ class Names {
     private val declarationToName: MutableMap<IrDeclaration, Reference> = mutableMapOf()
 
     fun nameFor(declaration: IrDeclaration): Reference = declarationToName.computeIfAbsent(declaration) {
-        // todo support class members
         val library = nameFor(declaration.file)
         val baseName = if (declaration.parent is IrClass) {
             nameFor(declaration.parentAsClass).canonicalName!!

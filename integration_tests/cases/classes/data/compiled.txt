@@ -1,0 +1,51 @@
+main = roo::main;
+library from "rootKt" as roo {
+
+  class Foo extends core::Object {
+    field core::String x_field;
+    constructor •(final core::String x) → roo::Foo
+      : super core::Object::•() {
+      {
+        this.{roo::Foo::x_field} = x;
+      }
+    }
+    get x() → core::String {
+      return this.{roo::Foo::x_field};
+    }
+    method component1() → core::String {
+      return this.{roo::Foo::x_field};
+    }
+    method copy(final core::String x) → roo::Foo {
+      return new roo::Foo::•(x);
+    }
+    method copy$default(final core::String? x, final core::int $mask0) → roo::Foo {
+      final core::String? x = !$mask0.{core::int::&}(1).{core::Object::==}(0) ? this.{roo::Foo::x_field} : x;
+      return roo::Foo::copy(x);
+    }
+    method toString() → core::String {
+      return "Foo(x=${this.{roo::Foo::x_field}})";
+    }
+    get hashCode() → core::int {
+      return this.{roo::Foo::x_field}.{core::Object::hashCode};
+    }
+    method ==(final dynamic other) → core::bool {
+      if(core::identical(this, other))
+        return true;
+      if(!(other is{ForNonNullableByDefault} roo::Foo))
+        return false;
+      final roo::Foo tmp0_other_with_cast = other as{ForNonNullableByDefault} roo::Foo;
+      if(!this.{roo::Foo::x_field}.{core::Object::==}(tmp0_other_with_cast.{roo::Foo::x_field}))
+        return false;
+      return true;
+    }
+  }
+  static method main() → void {
+    final roo::Foo foo = new roo::Foo::•("hello world");
+    final roo::Foo foo2 = new roo::Foo::•("hello world");
+    final roo::Foo bar = new roo::Foo::•("no");
+    core::print(foo);
+    core::print("foo == foo2: ${foo.{core::Object::==}(foo2)}. hash equals: ${foo.{core::Object::hashCode}.{core::Object::==}(foo2.{core::Object::hashCode})}");
+    core::print("foo == bar: ${foo.{core::Object::==}(bar)}. hash equals: ${foo.{core::Object::hashCode}.{core::Object::==}(bar.{core::Object::hashCode})}");
+    core::print("foo === foo2: ${core::identical(foo, bar)}");
+  }
+}

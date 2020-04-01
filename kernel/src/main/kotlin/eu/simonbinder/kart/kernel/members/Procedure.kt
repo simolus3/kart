@@ -14,9 +14,9 @@ enum class ProcedureKind {
 }
 
 class Procedure(
-    val kind: ProcedureKind,
+    var kind: ProcedureKind,
     function: FunctionNode,
-    val name: Name? = null,
+    var name: Name? = null,
     reference: Reference? = null,
     var fileUri: Uri? = null
 ): Member(reference), HasFlags {

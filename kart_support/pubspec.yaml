@@ -7,8 +7,11 @@ environment:
 
 dependencies:
   path: ^1.6.4
-  kernel: ^0.3.29
-  front_end: any # kernel depends on front_end without declaring a dependency in its pubspec
+  kernel:
+    hosted:
+      name: kernel
+      url: https://kneipe.simonbinder.eu/dart/edge
+#  front_end: any # kernel depends on front_end without declaring a dependency in its pubspec
 
 dev_dependencies:
   pedantic: ^1.8.0

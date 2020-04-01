@@ -23,9 +23,18 @@ abstract class TreeNode : Node {
 
 abstract class NamedNode(reference: Reference? = null) : TreeNode() {
 
-    val reference: Reference = reference ?: Reference()
+    var reference: Reference = reference ?: Reference()
+        private set
 
-    val canonicalName: CanonicalName? get() = reference.canonicalName
+    var canonicalName: CanonicalName?
+        get() = reference.canonicalName
+        set(value) {
+            canonicalName?.unbind()
+
+            if (value != null) {
+                reference = value.asReference().also { it.node = this }
+            }
+        }
 
     init {
         this.reference.node = this

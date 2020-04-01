@@ -2,15 +2,17 @@ package eu.simonbinder.kart.transformer.names
 
 import eu.simonbinder.kart.kernel.CanonicalName
 import eu.simonbinder.kart.kernel.CanonicalName.Companion.CONSTRUCTORS
+import eu.simonbinder.kart.kernel.CanonicalName.Companion.GETTERS
 import eu.simonbinder.kart.kernel.CanonicalName.Companion.METHODS
 import eu.simonbinder.kart.kernel.asReference
 import eu.simonbinder.kart.kernel.types.InterfaceType
 
-class ImportantDartNames(private val root: CanonicalName) {
+class ImportantDartNames(root: CanonicalName) {
 
     val dartCore = root.getChild("dart:core")
 
     val objectName = dartCore.getChild("Object")
+    val objectHashCode = objectName.getChild(GETTERS).getChild("hashCode")
 
     val intName = dartCore.getChild("int")
     val numName = dartCore.getChild("num")

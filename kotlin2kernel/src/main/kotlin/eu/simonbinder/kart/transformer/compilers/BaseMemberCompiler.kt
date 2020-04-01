@@ -95,6 +95,8 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
         procedure.fileEndOffset = declaration.endOffset
         procedure.isStatic = isStatic
 
+        data.info.dartIntrinsics.applyIntrinsicProcedureName(procedure, declaration)
+
         return procedure
     }
 
