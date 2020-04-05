@@ -70,10 +70,4 @@ object ClassMemberCompiler : BaseMemberCompiler<InClassContext>() {
 
         data.target.members.add(dartConstructor)
     }
-
-    override fun visitFunction(declaration: IrFunction, data: InClassContext) {
-        if (declaration.body != null) {
-            super.visitFunction(declaration, data)
-        }
-    }
 }

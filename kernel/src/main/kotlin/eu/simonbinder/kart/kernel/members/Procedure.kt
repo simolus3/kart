@@ -4,6 +4,7 @@ import eu.simonbinder.kart.kernel.*
 import eu.simonbinder.kart.kernel.utils.HasFlags
 import eu.simonbinder.kart.kernel.utils.child
 import eu.simonbinder.kart.kernel.utils.flag
+import eu.simonbinder.kart.kernel.utils.nullableChild
 
 enum class ProcedureKind {
     METHOD,
@@ -15,7 +16,7 @@ enum class ProcedureKind {
 
 class Procedure(
     var kind: ProcedureKind,
-    function: FunctionNode,
+    function: FunctionNode?,
     var name: Name? = null,
     reference: Reference? = null,
     var fileUri: Uri? = null
@@ -29,7 +30,7 @@ class Procedure(
 
     override var flags: Int = 0
 
-    val function by child(function)
+    val function by nullableChild<FunctionNode?>(function)
 
     var isStatic by flag(0)
     var isAbstract by flag(1)
@@ -46,6 +47,6 @@ class Procedure(
     }
 
     override fun <T> visitChildren(visitor: TreeVisitor<T>) {
-        function.accept(visitor)
+        function?.accept(visitor)
     }
 }

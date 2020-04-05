@@ -57,6 +57,12 @@ private val innerClassConstructorCallsLoweringPhase = makeIrModulePhase(
     description = "Replace inner class constructor invocation"
 )
 
+private val moveInnerClassesUpPhase = makeIrModulePhase(
+    { _: DartBackendContext -> MoveInnerClassesUp() },
+    name = "Move inner classes up",
+    description = "Makes inner classes top-level members"
+)
+
 private val propertiesLoweringPhase = makeIrModulePhase<DartBackendContext>(
     { context -> PropertiesLowering(context) },
     name = "PropertiesLowering",
@@ -153,6 +159,7 @@ val dartPhases = namedIrModulePhase(
             stripTypeAliasDeclarationsPhase then
             innerClassesLoweringPhase then
             innerClassConstructorCallsLoweringPhase then
+            moveInnerClassesUpPhase then
             propertiesLoweringPhase then
             initializersLoweringPhase then
             cleanRemovedInitializersLowering then

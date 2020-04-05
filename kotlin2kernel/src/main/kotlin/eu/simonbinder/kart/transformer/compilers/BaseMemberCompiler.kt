@@ -10,10 +10,7 @@ import eu.simonbinder.kart.transformer.context.MemberCompilationContext
 import eu.simonbinder.kart.transformer.context.names
 import eu.simonbinder.kart.transformer.identifierOrNull
 import org.jetbrains.kotlin.ir.IrElement
-import org.jetbrains.kotlin.ir.declarations.IrField
-import org.jetbrains.kotlin.ir.declarations.IrFunction
-import org.jetbrains.kotlin.ir.declarations.IrProperty
-import org.jetbrains.kotlin.ir.declarations.IrValueParameter
+import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.isGetter
@@ -31,6 +28,8 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
     protected abstract val isStatic: Boolean
 
     override fun visitFunction(declaration: IrFunction, data: T) {
+        if (declaration.origin == IrDeclarationOrigin.FAKE_OVERRIDE) return
+
         val procedure = compileProcedure(declaration, data)
         data.target.members.add(procedure)
     }
@@ -60,7 +59,7 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
         declaration: IrFunction,
         data: T,
         overrideBody: IrBody? = declaration.body
-    ): FunctionNode {
+    ): FunctionNode? {
         val (contextForBody, parameters) = createBodyContextAndParams(declaration, data)
 
         return FunctionNode(
@@ -105,6 +104,8 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
     }
 
     override fun visitField(declaration: IrField, data: T) {
+        if (declaration.origin == IrDeclarationOrigin.FAKE_OVERRIDE) return
+
         // In Kernel, fields are closely linked to their corresponding getters and setters.
         val field = Field(
             name = data.names.simpleNameFor(declaration),

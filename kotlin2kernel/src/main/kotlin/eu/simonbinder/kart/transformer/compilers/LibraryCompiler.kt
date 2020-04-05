@@ -29,7 +29,7 @@ object LibraryCompiler : BaseMemberCompiler<InLibraryContext>() {
             if (isInterface) {
                 superInterfaces += dartType
             } else {
-                assert(superClass == null)
+                assert(superClass == null) { "$declaration somehow has multiple superclasses" }
                 superClass = dartType
             }
         }
