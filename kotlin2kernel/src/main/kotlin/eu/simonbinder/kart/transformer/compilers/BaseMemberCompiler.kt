@@ -59,13 +59,21 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
         declaration: IrFunction,
         data: T,
         overrideBody: IrBody? = declaration.body
-    ): FunctionNode? {
+    ): FunctionNode {
         val (contextForBody, parameters) = createBodyContextAndParams(declaration, data)
+        return compileFunctionNodeWithContextAndParameters(declaration, contextForBody, parameters, overrideBody)
+    }
 
+    protected fun compileFunctionNodeWithContextAndParameters(
+        declaration: IrFunction,
+        contextForBody: InBodyCompilationContext,
+        params: List<VariableDeclaration>,
+        overrideBody: IrBody? = declaration.body
+    ): FunctionNode {
         return FunctionNode(
             body = overrideBody?.accept(BodyCompiler, contextForBody),
-            positionalParameters = parameters,
-            returnType = data.info.dartTypeFor(declaration.returnType)
+            positionalParameters = params,
+            returnType = contextForBody.info.dartTypeFor(declaration.returnType)
         ).also {
             it.fileOffset = declaration.startOffset
             it.endOffset = declaration.endOffset

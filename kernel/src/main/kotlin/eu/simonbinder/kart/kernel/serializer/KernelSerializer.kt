@@ -785,6 +785,13 @@ class KernelSerializer(
 
     // Initializers
 
+    override fun visitFieldInitializer(node: FieldInitializer) {
+        writeByte(Tags.FIELD_INITIALIZER)
+        writeBool(node.isSynthetic)
+        writeReference(node.field)
+        writeExpression(node.value)
+    }
+
     override fun visitSuperInitializer(node: SuperInitializer) {
         writeByte(Tags.SUPER_INITIALIZER)
         writeBaseRedirectingInitializer(node)

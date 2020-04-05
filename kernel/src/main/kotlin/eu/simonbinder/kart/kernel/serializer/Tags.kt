@@ -10,6 +10,7 @@ object Tags {
     const val CONSTRUCTOR = 5u
     const val PROCEDURE = 6u
 
+    const val FIELD_INITIALIZER = 8u
     const val SUPER_INITIALIZER = 9u
     const val REDIRECTING_INITIALIZER = 10u
 

@@ -9,6 +9,7 @@ import eu.simonbinder.kart.kernel.members.Component
 import eu.simonbinder.kart.kernel.members.Library
 import eu.simonbinder.kart.kernel.members.Member
 import eu.simonbinder.kart.kernel.members.MemberVisitor
+import eu.simonbinder.kart.kernel.members.initializers.FieldInitializer
 import eu.simonbinder.kart.kernel.members.initializers.Initializer
 import eu.simonbinder.kart.kernel.members.initializers.RedirectingInitializer
 import eu.simonbinder.kart.kernel.members.initializers.SuperInitializer
@@ -38,6 +39,7 @@ interface TreeVisitor<R> :
     fun visitTypeParameter(node: TypeParameter): R = defaultTreeNode(node)
 
     fun defaultInitializer(node: Initializer): R = defaultTreeNode(node)
+    fun visitFieldInitializer(node: FieldInitializer): R = defaultTreeNode(node)
     fun visitSuperInitializer(node: SuperInitializer): R = defaultInitializer(node)
     fun visitRedirectingInitializer(node: RedirectingInitializer): R = defaultInitializer(node)
 }

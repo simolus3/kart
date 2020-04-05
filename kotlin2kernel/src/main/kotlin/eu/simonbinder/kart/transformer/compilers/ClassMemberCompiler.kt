@@ -4,16 +4,21 @@ import eu.simonbinder.kart.kernel.Name
 import eu.simonbinder.kart.kernel.asReference
 import eu.simonbinder.kart.kernel.expressions.Arguments
 import eu.simonbinder.kart.kernel.members.Constructor
+import eu.simonbinder.kart.kernel.members.initializers.FieldInitializer
+import eu.simonbinder.kart.kernel.members.initializers.Initializer
 import eu.simonbinder.kart.kernel.members.initializers.RedirectingInitializer
 import eu.simonbinder.kart.kernel.members.initializers.SuperInitializer
 import eu.simonbinder.kart.transformer.context.InBodyCompilationContext
 import eu.simonbinder.kart.transformer.context.InClassContext
 import eu.simonbinder.kart.transformer.context.names
+import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
+import org.jetbrains.kotlin.ir.expressions.IrSetField
 import org.jetbrains.kotlin.ir.expressions.impl.IrBlockBodyImpl
+import org.jetbrains.kotlin.ir.expressions.impl.IrBlockImpl
 import org.jetbrains.kotlin.ir.util.file
 
 object ClassMemberCompiler : BaseMemberCompiler<InClassContext>() {
@@ -26,47 +31,70 @@ object ClassMemberCompiler : BaseMemberCompiler<InClassContext>() {
         // via `: this()`, that would be represented in the IR body. But since those
         // things are supported in Dart directly, we try to reverse it.
         var body = declaration.body as? IrBlockBody
-        val statements = body?.statements?.toMutableList()
+        val statements = body?.statements ?: emptyList<IrStatement>()
 
-        val initializer = (statements?.firstOrNull() as? IrDelegatingConstructorCall)?.let { call ->
-            val isSuper = call.symbol.descriptor.constructedClass !=
-                    declaration.symbol.descriptor.constructedClass
+        // Transform the first statements to Kernel initializers, as long as that's possible.
+        val initializers = mutableListOf<Initializer>()
+        val bodyStatements = mutableListOf<IrStatement>()
+        var isReadingInitializers = true
 
-            val target = if (data.info.dartIntrinsics.isDefaultObjectConstructor(call)) {
-                data.names.dartNames.objectDefaultConstructor.asReference()
-            } else {
-                data.names.nameFor(call.symbol.owner)
+        val (context, parameters) = createBodyContextAndParams(declaration, data)
+
+        for (stmt in statements) {
+            if (!isReadingInitializers) {
+                bodyStatements.add(stmt)
+                continue
             }
 
-            val (context, _) = createBodyContextAndParams(declaration, data)
+            val initializer = when (stmt) {
+                is IrDelegatingConstructorCall -> {
+                    val isSuper = stmt.symbol.descriptor.constructedClass !=
+                            declaration.symbol.descriptor.constructedClass
 
-            val arguments = Arguments(
-                positional = List(call.valueArgumentsCount) { index ->
-                    call.getValueArgument(index)!!.accept(ExpressionCompiler, context)
+                    val target = if (data.info.dartIntrinsics.isDefaultObjectConstructor(stmt)) {
+                        data.names.dartNames.objectDefaultConstructor.asReference()
+                    } else {
+                        data.names.nameFor(stmt.symbol.owner)
+                    }
+
+                    val arguments = Arguments(
+                        positional = List(stmt.valueArgumentsCount) { index ->
+                            stmt.getValueArgument(index)!!.accept(ExpressionCompiler, context)
+                        }
+                    )
+
+                    if (isSuper) {
+                        SuperInitializer(target, arguments)
+                    }  else {
+                        RedirectingInitializer(target, arguments)
+                    }
                 }
-            )
+                is IrSetField -> {
+                    val dartField = data.names.nameFor(stmt.symbol.owner)
+                    val value = stmt.value.accept(ExpressionCompiler, context)
 
-            if (isSuper) {
-                SuperInitializer(target, arguments)
-            }  else {
-                RedirectingInitializer(target, arguments)
+                    FieldInitializer(dartField, value)
+                }
+                else -> null
+            }
+
+            if (initializer != null) {
+                initializers.add(initializer)
+            } else {
+                isReadingInitializers = false
+                bodyStatements.add(stmt)
             }
         }
 
-        if (initializer != null) {
-            statements.removeAt(0)
-            body = IrBlockBodyImpl(body!!.startOffset, body.endOffset, statements)
-        }
+        body = IrBlockBodyImpl(body!!.startOffset, body.endOffset, bodyStatements)
 
         val dartConstructor = Constructor(
             reference = data.names.nameFor(declaration),
             name = Name(""),
             fileUri = data.info.loadFile(declaration.file),
-            function = compileFunctionNode(declaration, data, body)
+            function = compileFunctionNodeWithContextAndParameters(declaration, context, parameters, body)
         )
-        if (initializer != null) {
-            dartConstructor.initializers.add(initializer)
-        }
+        initializers.forEach { dartConstructor.initializers.add(it) }
 
         data.target.members.add(dartConstructor)
     }
