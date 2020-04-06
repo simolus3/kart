@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 class Kotlin2KernelTransformer(private val dartBackendContext: DartBackendContext) {
     val component = Component()
 
-    private val names = Names()
+    private val names = Names(dartBackendContext)
 
     private fun createContext() = GlobalCompilationContext(CompilationInfo(names, component, dartBackendContext))
 

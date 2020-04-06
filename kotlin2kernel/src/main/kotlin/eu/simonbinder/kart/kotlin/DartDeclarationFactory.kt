@@ -16,12 +16,10 @@ import org.jetbrains.kotlin.ir.symbols.impl.IrConstructorSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrValueParameterSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.makeNullable
-import org.jetbrains.kotlin.ir.util.deepCopyWithSymbols
-import org.jetbrains.kotlin.ir.util.defaultType
-import org.jetbrains.kotlin.ir.util.parentAsClass
+import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.name.Name
 
-class DartDeclarationFactory : DeclarationFactory {
+class DartDeclarationFactory(private val context: DartBackendContext) : DeclarationFactory {
 
     private val outerThisDeclarations = HashMap<IrClass, IrField>()
     private val innerClassConstructors = HashMap<IrConstructor, IrConstructor>()
@@ -34,9 +32,13 @@ class DartDeclarationFactory : DeclarationFactory {
 
     override fun getFieldForObjectInstance(singleton: IrClass): IrField {
         return singletonsToInstanceField.getOrPut(singleton) {
+            // If the class was a nested / inner / companion class that was raised to the library level, it will have a
+            // changed unqualified name that we should respect for uniques purposes. Otherwise, two different nested
+            // classes with the same (unqualified) name would have the same instance field name.
+            val safeName = context.changedUnqualifiedNames[singleton] ?: singleton.name.identifier
 
             buildField {
-                name = Name.identifier(singleton.name.asString() + "_instance")
+                name = Name.identifier(safeName + "_instance")
                 type = singleton.defaultType
                 isStatic = true
                 isFinal = true

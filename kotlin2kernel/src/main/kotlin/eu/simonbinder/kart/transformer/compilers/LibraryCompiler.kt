@@ -38,7 +38,7 @@ object LibraryCompiler : BaseMemberCompiler<InLibraryContext>() {
 
         val dartClass = Class(
             reference = data.names.nameFor(declaration),
-            name = declaration.name.identifier,
+            name = data.names.simpleNameFor(declaration).name,
             fileUri = data.info.loadFile(declaration.file),
             superClass = superClass,
             implementedClasses = superInterfaces

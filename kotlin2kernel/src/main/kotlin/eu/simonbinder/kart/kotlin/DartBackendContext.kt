@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.descriptors.ModuleDescriptor
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.incremental.components.NoLookupLocation
 import org.jetbrains.kotlin.ir.IrElement
+import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
@@ -34,7 +35,9 @@ class DartBackendContext(
 
     override val sharedVariablesManager = DartSharedVariablesManager
     override val builtIns = module.builtIns
-    override val declarationFactory = DartDeclarationFactory()
+    override val declarationFactory = DartDeclarationFactory(this)
+
+    val changedUnqualifiedNames = HashMap<IrDeclaration, String>()
 
     private val coroutinePackage = module.getPackage(COROUTINE_PACKAGE_FQNAME)
     private val coroutineContextProperty: PropertyDescriptor

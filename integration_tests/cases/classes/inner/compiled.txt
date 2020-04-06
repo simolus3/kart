@@ -16,19 +16,19 @@ library from "rootKt" as roo {
       return "Foo(${this.{roo::Foo::x}})";
     }
   }
-  class Bar extends core::Object {
+  class Foo$Bar extends core::Object {
     field roo::Foo this$outer_field;
-    constructor •(final roo::Foo $outer) → roo::Bar
-      : roo::Bar::this$outer_field = $outer, super core::Object::•() {
+    constructor •(final roo::Foo $outer) → roo::Foo$Bar
+      : roo::Foo$Bar::this$outer_field = $outer, super core::Object::•() {
       {}
     }
     method toString() → core::String {
-      return "${this.{roo::Bar::this$outer_field}}.Bar";
+      return "${this.{roo::Foo$Bar::this$outer_field}}.Bar";
     }
   }
   static method main() → void {
     final roo::Foo foo = new roo::Foo::•("hi");
-    final roo::Bar bar = new roo::Bar::•(foo);
+    final roo::Foo$Bar bar = new roo::Foo$Bar::•(foo);
     core::print(bar);
   }
 }

@@ -58,7 +58,7 @@ private val innerClassConstructorCallsLoweringPhase = makeIrModulePhase(
 )
 
 private val moveInnerClassesUpPhase = makeIrModulePhase(
-    { _: DartBackendContext -> MoveInnerClassesUp() },
+    ::MoveInnerClassesUp,
     name = "Move inner classes up",
     description = "Makes inner classes top-level members"
 )
