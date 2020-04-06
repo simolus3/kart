@@ -1,0 +1,21 @@
+main = roo::main;
+library from "rootKt" as roo {
+
+  class Test extends core::Object {
+    constructor •() → roo::Test
+      : super core::Object::•() {
+      {
+        {
+          this.{roo::Test::foo}();
+        }
+      }
+    }
+    method foo() → void {
+      core::print("${this} instance here");
+    }
+  }
+  static final field roo::Test Test_instance_field = new roo::Test::•();
+  static method main() → void {
+    roo::Test_instance_field;
+  }
+}

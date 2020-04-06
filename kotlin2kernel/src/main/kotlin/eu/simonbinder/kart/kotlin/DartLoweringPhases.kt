@@ -127,6 +127,18 @@ private val tailrecLoweringPhase = makeIrModulePhase(
     description = "Replace `tailrec` callsites with equivalent loop"
 )
 
+private val objectDeclarationPhase = makeIrModulePhase(
+    ::ObjectDeclarationLowering,
+    name = "ObjectDeclarationLowering",
+    description = "Generate instance fields for object classes"
+)
+
+private val objectUsagePhase = makeIrModulePhase(
+    ::ObjectUsageLowering,
+    name = "ObjectUsageLowering",
+    description = "Replaces object references with generated instance field"
+)
+
 private val removeInlineFunctionsWithReifiedTypeParametersLoweringPhase = makeIrModulePhase<CommonBackendContext>(
     { RemoveInlineFunctionsWithReifiedTypeParametersLowering() },
     name = "RemoveInlineFunctionsWithReifiedTypeParametersLowering",
@@ -171,6 +183,8 @@ val dartPhases = namedIrModulePhase(
             // functionInliningPhase then
             //removeInlineFunctionsWithReifiedTypeParametersLoweringPhase then
             tailrecLoweringPhase then
+            objectDeclarationPhase then
+            objectUsagePhase then
             expressionToStatementLoweringPhase then
             primitiveTypeLoweringPhase then
             typeOperatorLowering

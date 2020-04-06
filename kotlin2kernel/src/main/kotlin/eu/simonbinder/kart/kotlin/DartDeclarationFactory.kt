@@ -7,16 +7,15 @@ import org.jetbrains.kotlin.backend.common.ir.copyTo
 import org.jetbrains.kotlin.backend.common.ir.copyTypeParametersFrom
 import org.jetbrains.kotlin.backend.jvm.JvmLoweredDeclarationOrigin
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
+import org.jetbrains.kotlin.ir.builders.declarations.addField
 import org.jetbrains.kotlin.ir.builders.declarations.buildField
-import org.jetbrains.kotlin.ir.declarations.IrClass
-import org.jetbrains.kotlin.ir.declarations.IrConstructor
-import org.jetbrains.kotlin.ir.declarations.IrEnumEntry
-import org.jetbrains.kotlin.ir.declarations.IrField
+import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrConstructorImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrValueParameterImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrConstructorSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrValueParameterSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.util.deepCopyWithSymbols
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.parentAsClass
@@ -27,12 +26,26 @@ class DartDeclarationFactory : DeclarationFactory {
     private val outerThisDeclarations = HashMap<IrClass, IrField>()
     private val innerClassConstructors = HashMap<IrConstructor, IrConstructor>()
 
+    private val singletonsToInstanceField = HashMap<IrClass, IrField>()
+
     override fun getFieldForEnumEntry(enumEntry: IrEnumEntry, entryType: IrType): IrField {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getFieldForObjectInstance(singleton: IrClass): IrField {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return singletonsToInstanceField.getOrPut(singleton) {
+
+            buildField {
+                name = Name.identifier(singleton.name.asString() + "_instance")
+                type = singleton.defaultType
+                isStatic = true
+                isFinal = true
+            }.apply {
+                // Kotlin IR doesn't support static fields (only companion objects), so put this field in the enclosing
+                // library
+                parent = singleton.parent
+            }
+        }
     }
 
     override fun getInnerClassConstructorWithOuterThisParameter(innerClassConstructor: IrConstructor): IrConstructor {

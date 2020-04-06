@@ -14,7 +14,6 @@ import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.symbols.impl.IrVariableSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
-import org.jetbrains.kotlin.js.parser.parseExpressionOrStatement
 import org.jetbrains.kotlin.name.Name
 
 class ExpressionToStatementLowering(private val context: DartBackendContext) : FunctionLoweringPass {
@@ -119,6 +118,10 @@ private class ExpressionToSetVariableTransformer(
     }
 
     override fun visitSetField(expression: IrSetField, data: ExpressionUsage) = expression.also {
+        expression.value = expression.value.transform(this, ExpressionUsage.INDEPENDENT_EXPRESSION)
+    }
+
+    override fun visitThrow(expression: IrThrow, data: ExpressionUsage) = expression.also {
         expression.value = expression.value.transform(this, ExpressionUsage.INDEPENDENT_EXPRESSION)
     }
 

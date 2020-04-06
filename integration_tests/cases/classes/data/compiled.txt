@@ -20,7 +20,7 @@ library from "rootKt" as roo {
     }
     method copy$default(final core::String? x, final core::int $mask0) → roo::Foo {
       final core::String? x = !$mask0.{core::int::&}(1).{core::Object::==}(0) ? this.{roo::Foo::x_field} : x;
-      return roo::Foo::copy(x);
+      return this.{roo::Foo::copy}(x);
     }
     method toString() → core::String {
       return "Foo(x=${this.{roo::Foo::x_field}})";

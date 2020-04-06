@@ -89,7 +89,12 @@ object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContex
                     val value = expression.getValueArgument(0)!!.accept(this, data)
                     PropertySet(dartReceiver, name, value, dartFunctionReference)
                 }
-                canonicalName.isNonPropertyAccessorMethod -> StaticInvocation(dartFunctionReference, expression.arguments(data))
+                canonicalName.isNonPropertyAccessorMethod -> MethodInvocation(
+                    dartReceiver,
+                    name,
+                    expression.arguments(data),
+                    dartFunctionReference
+                )
                 else -> throw UnsupportedOperationException("Did not expect a call to $canonicalName")
             }
         }.withIrOffsets(expression)
