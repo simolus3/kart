@@ -19,6 +19,8 @@ import org.jetbrains.kotlin.ir.symbols.IrFileSymbol
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classOrNull
+import org.jetbrains.kotlin.ir.util.isFunction
+import org.jetbrains.kotlin.ir.util.isKSuspendFunction
 import java.io.File
 
 class CompilationInfo(
@@ -45,6 +47,7 @@ class CompilationInfo(
     }
 
     fun dartTypeFor(irType: IrType): DartType {
+        irType.isFunction()
         val intrinsic = dartIntrinsics.intrinsicType(irType)
         if (intrinsic != null) return intrinsic
 

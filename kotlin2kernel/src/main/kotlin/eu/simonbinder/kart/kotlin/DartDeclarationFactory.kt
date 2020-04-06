@@ -39,6 +39,7 @@ class DartDeclarationFactory(private val context: DartBackendContext) : Declarat
 
             buildField {
                 name = Name.identifier(safeName + "_instance")
+                origin = IrDeclarationOrigin.FIELD_FOR_OBJECT_INSTANCE
                 type = singleton.defaultType
                 isStatic = true
                 isFinal = true
