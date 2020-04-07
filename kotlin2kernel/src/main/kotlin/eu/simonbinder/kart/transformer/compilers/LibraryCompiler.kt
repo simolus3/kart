@@ -22,6 +22,14 @@ object LibraryCompiler : BaseMemberCompiler<InLibraryContext>() {
         var superClass: DartType? = null
         val superInterfaces = mutableListOf<DartType>()
 
+        val kotlinSuperTypes = declaration.superTypes
+        val kotlinAny = data.info.irBuiltIns.anyType
+
+        if (kotlinSuperTypes.all { it.isInterface() }) {
+            // a class only implementing interfaces somehow doesn't have kotlin.Any as a supertype
+            kotlinSuperTypes += kotlinAny
+        }
+
         for (superType in declaration.superTypes) {
             val isInterface = superType.classOrNull?.owner?.isInterface ?: false
             val dartType = data.info.dartTypeFor(superType)

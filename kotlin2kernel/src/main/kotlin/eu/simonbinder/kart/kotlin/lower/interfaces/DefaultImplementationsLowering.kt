@@ -60,6 +60,8 @@ import org.jetbrains.kotlin.ir.util.isInterface
  *
  * See also:
  *  - [org.jetbrains.kotlin.backend.jvm.lower.InterfaceLowering] for the JVM.
+ *  - [InterfaceSuperCallsLowering], which lowers super calls in interfaces when they point to a default implementation
+ *  - [InterfaceDelegationLowering], which adds delegating methods to child classes
  */
 class DefaultImplementationsLowering(private val context: DartBackendContext) : ClassLoweringPass {
     override fun lower(irClass: IrClass) {

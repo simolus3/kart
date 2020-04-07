@@ -189,6 +189,7 @@ val dartPhases = namedIrModulePhase(
     name = "DartIrModuleLowering",
     description = "Lower Kotlin IR to make Dart compilation easier",
     lower = expectDeclarationsRemovingPhase then
+            //addFakeConstructorToInterfacePhase then
             stripTypeAliasDeclarationsPhase then
             innerClassesLoweringPhase then
             innerClassConstructorCallsLoweringPhase then

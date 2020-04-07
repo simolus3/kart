@@ -13,6 +13,8 @@ class DartFunctionOrigin(
     val isStatic: Boolean
 ) : IrDeclarationOrigin {
 
+    override fun toString() = "DartFunctionOrigin($name)"
+
     companion object {
         val StaticDefaultMethod = DartFunctionOrigin("StaticDefaultMethod", isSynthetic = true, isStatic = true)
     }

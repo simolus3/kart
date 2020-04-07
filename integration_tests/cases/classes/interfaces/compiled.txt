@@ -1,0 +1,38 @@
+main = roo::main;
+library from "rootKt" as roo {
+
+  abstract class Base extends core::Object {
+    abstract method m1() → core::int;
+    abstract method m2() → core::int;
+    static method m2$defaultImpl(final roo::Base this) → core::int {
+      return this.{roo::Base::m1}().{core::num::*}(2);
+    }
+  }
+  abstract class Another extends core::Object {
+    abstract method m3() → core::int;
+  }
+  abstract class Chained extends core::Object implements roo::Base, roo::Another {
+    abstract method m3() → core::int;
+    static method m3$defaultImpl(final roo::Chained this) → core::int {
+      return this.{roo::Base::m2}().{core::num::+}(roo::Base::m2$defaultImpl(this));
+    }
+  }
+  class Impl extends core::Object implements roo::Chained {
+    constructor •() → roo::Impl
+      : super core::Object::•() {
+      {}
+    }
+    method m1() → core::int {
+      return 3;
+    }
+    method m2() → core::int {
+      return 1;
+    }
+    method m3() → core::int {
+      return roo::Chained::m3$defaultImpl(this);
+    }
+  }
+  static method main() → void {
+    core::print(new roo::Impl::•().{roo::Chained::m3}());
+  }
+}

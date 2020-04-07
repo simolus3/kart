@@ -14,9 +14,7 @@ import eu.simonbinder.kart.transformer.context.names
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrFunction
-import org.jetbrains.kotlin.ir.expressions.IrBlockBody
-import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
-import org.jetbrains.kotlin.ir.expressions.IrSetField
+import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.expressions.impl.IrBlockBodyImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrBlockImpl
 import org.jetbrains.kotlin.ir.util.file
@@ -26,12 +24,18 @@ object ClassMemberCompiler : BaseMemberCompiler<InClassContext>() {
     override val isStatic: Boolean
         get() = false
 
+    private val IrBody.statements: List<IrStatement> get() = when (this) {
+        is IrExpressionBody -> listOf(expression)
+        is IrBlockBody -> statements
+        else -> error("Unknown body type")
+    }
+
     override fun visitConstructor(declaration: IrConstructor, data: InClassContext) {
         // If the constructor calls another constructor (e.g. `constructor(): super()` or
         // via `: this()`, that would be represented in the IR body. But since those
         // things are supported in Dart directly, we try to reverse it.
-        var body = declaration.body as? IrBlockBody
-        val statements = body?.statements ?: emptyList<IrStatement>()
+        var body = declaration.body
+        val statements = body?.statements ?: emptyList()
 
         // Transform the first statements to Kernel initializers, as long as that's possible.
         val initializers = mutableListOf<Initializer>()
@@ -86,7 +90,7 @@ object ClassMemberCompiler : BaseMemberCompiler<InClassContext>() {
             }
         }
 
-        body = IrBlockBodyImpl(body!!.startOffset, body.endOffset, bodyStatements)
+        body = body?.run { IrBlockBodyImpl(startOffset, endOffset, bodyStatements) }
 
         val dartConstructor = Constructor(
             reference = data.names.nameFor(declaration),
