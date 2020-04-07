@@ -1,6 +1,9 @@
 package eu.simonbinder.kart.kotlin
 
 import eu.simonbinder.kart.kotlin.lower.*
+import eu.simonbinder.kart.kotlin.lower.interfaces.DefaultImplementationsLowering
+import eu.simonbinder.kart.kotlin.lower.interfaces.InterfaceDelegationLowering
+import eu.simonbinder.kart.kotlin.lower.interfaces.InterfaceSuperCallsLowering
 import org.jetbrains.kotlin.backend.common.CommonBackendContext
 import org.jetbrains.kotlin.backend.common.lower.*
 import org.jetbrains.kotlin.backend.common.lower.inline.FunctionInlining
@@ -139,6 +142,24 @@ private val objectUsagePhase = makeIrModulePhase(
     description = "Replaces object references with generated instance field"
 )
 
+private val defaultImplementationsLoweringPhase = makeIrModulePhase(
+    ::DefaultImplementationsLowering,
+    name = "DefaultImplementationsLowering",
+    description = "Creates static methods for default implementations in interfaces"
+)
+
+private val interfaceSuperCallsLoweringPhase = makeIrModulePhase(
+    ::InterfaceSuperCallsLowering,
+    name = "InterfaceSuperCallsLowering",
+    description = "Replace super calls in interfaces with the static default method"
+)
+
+private val interfaceDelegationLoweringPhase = makeIrModulePhase(
+    ::InterfaceDelegationLowering,
+    name = "InterfaceDelegationLowering",
+    description = "Create delegating implementation methods for default methods in interfaces"
+)
+
 private val removeInlineFunctionsWithReifiedTypeParametersLoweringPhase = makeIrModulePhase<CommonBackendContext>(
     { RemoveInlineFunctionsWithReifiedTypeParametersLowering() },
     name = "RemoveInlineFunctionsWithReifiedTypeParametersLowering",
@@ -185,6 +206,9 @@ val dartPhases = namedIrModulePhase(
             tailrecLoweringPhase then
             objectDeclarationPhase then
             objectUsagePhase then
+            defaultImplementationsLoweringPhase then
+            interfaceSuperCallsLoweringPhase then
+            interfaceDelegationLoweringPhase then
             expressionToStatementLoweringPhase then
             primitiveTypeLoweringPhase then
             typeOperatorLowering

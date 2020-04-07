@@ -5,6 +5,7 @@ import eu.simonbinder.kart.kernel.members.Field
 import eu.simonbinder.kart.kernel.members.Procedure
 import eu.simonbinder.kart.kernel.members.ProcedureKind
 import eu.simonbinder.kart.kernel.statements.VariableDeclaration
+import eu.simonbinder.kart.kotlin.isStaticInDart
 import eu.simonbinder.kart.transformer.context.InBodyCompilationContext
 import eu.simonbinder.kart.transformer.context.MemberCompilationContext
 import eu.simonbinder.kart.transformer.context.names
@@ -26,6 +27,8 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
     private fun MemberCompilationContext.toBody() = InBodyCompilationContext(this)
 
     protected abstract val isStatic: Boolean
+
+    private val IrDeclaration.isStatic: Boolean get() = this@BaseMemberCompiler.isStatic || origin.isStaticInDart()
 
     override fun visitFunction(declaration: IrFunction, data: T) {
         if (declaration.origin == IrDeclarationOrigin.FAKE_OVERRIDE) return
@@ -100,7 +103,8 @@ abstract class BaseMemberCompiler<T: MemberCompilationContext> : IrElementVisito
         procedure.startFileOffset = declaration.startOffset
         procedure.fileOffset = declaration.startOffset
         procedure.fileEndOffset = declaration.endOffset
-        procedure.isStatic = isStatic
+        procedure.isStatic = declaration.isStatic
+        procedure.isAbstract = declaration.body == null
 
         data.info.dartIntrinsics.applyIntrinsicProcedureName(procedure, declaration)
 

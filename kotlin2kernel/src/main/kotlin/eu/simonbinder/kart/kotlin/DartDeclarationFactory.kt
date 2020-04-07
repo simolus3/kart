@@ -5,7 +5,9 @@ import org.jetbrains.kotlin.backend.common.descriptors.WrappedValueParameterDesc
 import org.jetbrains.kotlin.backend.common.ir.DeclarationFactory
 import org.jetbrains.kotlin.backend.common.ir.copyTo
 import org.jetbrains.kotlin.backend.common.ir.copyTypeParametersFrom
+import org.jetbrains.kotlin.backend.common.ir.createStaticFunctionWithReceivers
 import org.jetbrains.kotlin.backend.jvm.JvmLoweredDeclarationOrigin
+import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.builders.declarations.addField
 import org.jetbrains.kotlin.ir.builders.declarations.buildField
@@ -25,6 +27,8 @@ class DartDeclarationFactory(private val context: DartBackendContext) : Declarat
     private val innerClassConstructors = HashMap<IrConstructor, IrConstructor>()
 
     private val singletonsToInstanceField = HashMap<IrClass, IrField>()
+
+    private val defaultImplsMethods = HashMap<IrSimpleFunction, IrSimpleFunction>()
 
     override fun getFieldForEnumEntry(enumEntry: IrEnumEntry, entryType: IrType): IrField {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -104,6 +108,23 @@ class DartDeclarationFactory(private val context: DartBackendContext) : Declarat
 
             oldConstructor.valueParameters.mapTo(valueParameters) { it.copyTo(this, index = it.index + 1) }
             metadata = oldConstructor.metadata
+        }
+    }
+
+    fun staticDefaultImplForInterface(oldFunction: IrSimpleFunction): IrSimpleFunction {
+        val parentInterface = oldFunction.parentAsClass
+        assert(parentInterface.isInterface)
+
+        return defaultImplsMethods.getOrPut(oldFunction) {
+            val name = Name.identifier(oldFunction.name.identifier + "\$defaultImpl")
+
+            createStaticFunctionWithReceivers(
+                parentInterface,
+                name,
+                oldFunction,
+                dispatchReceiverType = parentInterface.defaultType,
+                origin = DartFunctionOrigin.StaticDefaultMethod
+            )
         }
     }
 

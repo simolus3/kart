@@ -1,7 +1,14 @@
 package eu.simonbinder.kart.kotlin.lower.interfaces
 
+import eu.simonbinder.kart.kotlin.DartBackendContext
 import org.jetbrains.kotlin.backend.common.ClassLoweringPass
+import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
+import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.addMember
+import org.jetbrains.kotlin.ir.util.functions
+import org.jetbrains.kotlin.ir.util.isInterface
 
 /**
  * Generates a static `$defaultImpl` method for methods in interfaces that have a default implementation. Essentially,
@@ -51,11 +58,28 @@ import org.jetbrains.kotlin.ir.declarations.IrClass
  * }
  * ```
  *
- * See also: [org.jetbrains.kotlin.backend.jvm.lower.InterfaceLowering] for the JVM.
+ * See also:
+ *  - [org.jetbrains.kotlin.backend.jvm.lower.InterfaceLowering] for the JVM.
  */
-class DefaultImplementationsLowering : ClassLoweringPass {
+class DefaultImplementationsLowering(private val context: DartBackendContext) : ClassLoweringPass {
     override fun lower(irClass: IrClass) {
-        TODO("Not yet implemented")
-    }
+        if (!irClass.isInterface) return
 
+        val addedMembers = mutableListOf<IrSimpleFunction>()
+
+        irClass.functions.forEach { function ->
+            if (function.modality != Modality.ABSTRACT && function.origin != IrDeclarationOrigin.FAKE_OVERRIDE) {
+                val staticDefaultImpl = context.declarationFactory.staticDefaultImplForInterface(function)
+                addedMembers += staticDefaultImpl
+
+                function.body = null
+                // todo should we make the old function abstract as well?
+            }
+        }
+
+        addedMembers.forEach {
+            it.parent = irClass
+            irClass.addMember(it)
+        }
+    }
 }
