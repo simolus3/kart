@@ -1,5 +1,5 @@
 import eu.simonbinder.kart.kernel.ast.members.Component
-import eu.simonbinder.kart.kernel.serializer.KernelSerializer
+import eu.simonbinder.kart.kernel.binary.serializer.KernelSerializer
 import eu.simonbinder.kart.kotlin.Frontend
 import eu.simonbinder.kart.transformer.Kotlin2KernelTransformer
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys

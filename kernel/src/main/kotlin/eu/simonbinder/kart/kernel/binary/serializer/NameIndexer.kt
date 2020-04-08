@@ -1,4 +1,4 @@
-package eu.simonbinder.kart.kernel.serializer
+package eu.simonbinder.kart.kernel.binary.serializer
 
 import eu.simonbinder.kart.kernel.CanonicalName
 

@@ -1,5 +1,5 @@
-import eu.simonbinder.kart.kernel.members.Component
-import eu.simonbinder.kart.kernel.serializer.KernelSerializer
+import eu.simonbinder.kart.kernel.ast.members.Component
+import eu.simonbinder.kart.kernel.binary.serializer.KernelSerializer
 import java.io.ByteArrayOutputStream
 import java.io.PrintWriter
 import java.nio.file.*

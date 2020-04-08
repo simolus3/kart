@@ -1,4 +1,4 @@
-package eu.simonbinder.kart.kernel.serializer
+package eu.simonbinder.kart.kernel.binary.serializer
 
 import eu.simonbinder.kart.kernel.*
 import eu.simonbinder.kart.kernel.ast.FunctionNode
@@ -7,6 +7,7 @@ import eu.simonbinder.kart.kernel.ast.expressions.*
 import eu.simonbinder.kart.kernel.ast.members.*
 import eu.simonbinder.kart.kernel.ast.members.initializers.*
 import eu.simonbinder.kart.kernel.ast.statements.*
+import eu.simonbinder.kart.kernel.binary.Tags
 import eu.simonbinder.kart.kernel.types.*
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
