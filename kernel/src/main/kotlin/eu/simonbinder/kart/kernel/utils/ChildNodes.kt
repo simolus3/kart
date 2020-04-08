@@ -1,6 +1,6 @@
 package eu.simonbinder.kart.kernel.utils
 
-import eu.simonbinder.kart.kernel.TreeNode
+import eu.simonbinder.kart.kernel.ast.TreeNode
 import kotlin.reflect.KProperty
 
 fun <T : TreeNode?> TreeNode.child(): ChildNodeDelegate<T> {

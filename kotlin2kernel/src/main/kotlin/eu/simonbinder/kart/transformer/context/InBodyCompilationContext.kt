@@ -1,7 +1,6 @@
 package eu.simonbinder.kart.transformer.context
 
-import eu.simonbinder.kart.kernel.statements.VariableDeclaration
-import eu.simonbinder.kart.transformer.metadata.LoopMetaData
+import eu.simonbinder.kart.kernel.ast.statements.VariableDeclaration
 import org.jetbrains.kotlin.ir.symbols.IrValueSymbol
 
 data class InBodyCompilationContext(

@@ -2,21 +2,18 @@ package eu.simonbinder.kart.transformer.compilers
 
 import eu.simonbinder.kart.kernel.Name
 import eu.simonbinder.kart.kernel.asReference
-import eu.simonbinder.kart.kernel.expressions.Arguments
-import eu.simonbinder.kart.kernel.members.Constructor
-import eu.simonbinder.kart.kernel.members.initializers.FieldInitializer
-import eu.simonbinder.kart.kernel.members.initializers.Initializer
-import eu.simonbinder.kart.kernel.members.initializers.RedirectingInitializer
-import eu.simonbinder.kart.kernel.members.initializers.SuperInitializer
-import eu.simonbinder.kart.transformer.context.InBodyCompilationContext
+import eu.simonbinder.kart.kernel.ast.expressions.Arguments
+import eu.simonbinder.kart.kernel.ast.members.Constructor
+import eu.simonbinder.kart.kernel.ast.members.initializers.FieldInitializer
+import eu.simonbinder.kart.kernel.ast.members.initializers.Initializer
+import eu.simonbinder.kart.kernel.ast.members.initializers.RedirectingInitializer
+import eu.simonbinder.kart.kernel.ast.members.initializers.SuperInitializer
 import eu.simonbinder.kart.transformer.context.InClassContext
 import eu.simonbinder.kart.transformer.context.names
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
-import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.expressions.impl.IrBlockBodyImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrBlockImpl
 import org.jetbrains.kotlin.ir.util.file
 
 object ClassMemberCompiler : BaseMemberCompiler<InClassContext>() {

@@ -1,7 +1,7 @@
 package eu.simonbinder.kart.kernel.types
 
-import eu.simonbinder.kart.kernel.TreeNode
-import eu.simonbinder.kart.kernel.TreeVisitor
+import eu.simonbinder.kart.kernel.ast.TreeNode
+import eu.simonbinder.kart.kernel.ast.TreeVisitor
 
 class TypeParameter(
     val name: String? = null,

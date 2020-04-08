@@ -4,17 +4,15 @@ import eu.simonbinder.kart.kernel.CanonicalName
 import eu.simonbinder.kart.kernel.Reference
 import eu.simonbinder.kart.kernel.asReference
 import eu.simonbinder.kart.kernel.Name as DartName
-import eu.simonbinder.kart.kernel.expressions.*
-import eu.simonbinder.kart.kernel.members.Procedure
-import eu.simonbinder.kart.kernel.members.ProcedureKind
+import eu.simonbinder.kart.kernel.ast.expressions.*
+import eu.simonbinder.kart.kernel.ast.members.Procedure
+import eu.simonbinder.kart.kernel.ast.members.ProcedureKind
 import eu.simonbinder.kart.kernel.types.*
 import eu.simonbinder.kart.transformer.identifierOrNull
 import eu.simonbinder.kart.transformer.names.ImportantDartNames
 import eu.simonbinder.kart.transformer.withIrOffsets
 import eu.simonbinder.kart.transformer.withNullabilityOfIr
-import org.jetbrains.kotlin.backend.common.ir.classIfConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
-import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
 import org.jetbrains.kotlin.ir.expressions.IrCall
@@ -24,8 +22,6 @@ import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.util.SymbolTable
 import org.jetbrains.kotlin.ir.util.constructedClass
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
-import org.jetbrains.kotlin.ir.util.overrides
-import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 
 class DartIntrinsics (

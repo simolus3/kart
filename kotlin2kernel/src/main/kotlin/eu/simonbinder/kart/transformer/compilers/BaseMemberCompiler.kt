@@ -1,10 +1,10 @@
 package eu.simonbinder.kart.transformer.compilers
 
-import eu.simonbinder.kart.kernel.FunctionNode
-import eu.simonbinder.kart.kernel.members.Field
-import eu.simonbinder.kart.kernel.members.Procedure
-import eu.simonbinder.kart.kernel.members.ProcedureKind
-import eu.simonbinder.kart.kernel.statements.VariableDeclaration
+import eu.simonbinder.kart.kernel.ast.FunctionNode
+import eu.simonbinder.kart.kernel.ast.members.Field
+import eu.simonbinder.kart.kernel.ast.members.Procedure
+import eu.simonbinder.kart.kernel.ast.members.ProcedureKind
+import eu.simonbinder.kart.kernel.ast.statements.VariableDeclaration
 import eu.simonbinder.kart.kotlin.isStaticInDart
 import eu.simonbinder.kart.transformer.context.InBodyCompilationContext
 import eu.simonbinder.kart.transformer.context.MemberCompilationContext

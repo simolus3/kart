@@ -1,6 +1,6 @@
 package eu.simonbinder.kart.kernel.serializer
 
-import eu.simonbinder.kart.kernel.statements.VariableDeclaration
+import eu.simonbinder.kart.kernel.ast.statements.VariableDeclaration
 import java.util.*
 
 /**

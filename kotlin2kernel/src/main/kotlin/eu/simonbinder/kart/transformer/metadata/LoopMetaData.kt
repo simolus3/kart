@@ -1,6 +1,6 @@
 package eu.simonbinder.kart.transformer.metadata
 
-import eu.simonbinder.kart.kernel.statements.LabeledStatement
+import eu.simonbinder.kart.kernel.ast.statements.LabeledStatement
 
 class LoopMetaData(
     var hasBreak: Boolean = false,

@@ -1,6 +1,6 @@
 package eu.simonbinder.kart.transformer.compilers
 
-import eu.simonbinder.kart.kernel.members.Class
+import eu.simonbinder.kart.kernel.ast.members.Class
 import eu.simonbinder.kart.kernel.types.DartType
 import eu.simonbinder.kart.transformer.context.InClassContext
 import eu.simonbinder.kart.transformer.context.InLibraryContext

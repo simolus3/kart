@@ -1,7 +1,8 @@
 package eu.simonbinder.kart.kernel
 
-import eu.simonbinder.kart.kernel.members.Field
-import eu.simonbinder.kart.kernel.members.Procedure
+import eu.simonbinder.kart.kernel.ast.NamedNode
+import eu.simonbinder.kart.kernel.ast.members.Field
+import eu.simonbinder.kart.kernel.ast.members.Procedure
 
 /**
  *  A string sequence that identifies a library, class, or member.

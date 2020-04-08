@@ -1,5 +1,7 @@
 package eu.simonbinder.kart.kernel
 
+import eu.simonbinder.kart.kernel.ast.TreeNode
+import eu.simonbinder.kart.kernel.ast.TreeVisitor
 import eu.simonbinder.kart.kernel.types.DartType
 import eu.simonbinder.kart.kernel.types.DartTypeVisitor
 

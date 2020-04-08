@@ -2,25 +2,21 @@ package eu.simonbinder.kart.transformer
 
 import eu.simonbinder.kart.kernel.Source
 import eu.simonbinder.kart.kernel.Uri
-import eu.simonbinder.kart.kernel.members.Component
+import eu.simonbinder.kart.kernel.ast.members.Component
 import eu.simonbinder.kart.kernel.types.DartType
-import eu.simonbinder.kart.kernel.types.DynamicType
 import eu.simonbinder.kart.kernel.types.InterfaceType
 import eu.simonbinder.kart.kotlin.DartBackendContext
 import eu.simonbinder.kart.transformer.invoke.DartIntrinsics
 import eu.simonbinder.kart.transformer.metadata.MetadataRepository
 import eu.simonbinder.kart.transformer.names.Names
-import org.jetbrains.kotlin.backend.common.ir.ir2string
 import org.jetbrains.kotlin.backend.jvm.ir.eraseTypeParameters
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.path
-import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
 import org.jetbrains.kotlin.ir.symbols.IrFileSymbol
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.util.isFunction
-import org.jetbrains.kotlin.ir.util.isKSuspendFunction
 import java.io.File
 
 class CompilationInfo(

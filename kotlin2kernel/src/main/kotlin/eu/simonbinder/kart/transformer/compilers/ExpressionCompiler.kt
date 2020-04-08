@@ -1,18 +1,16 @@
 package eu.simonbinder.kart.transformer.compilers
 
 import eu.simonbinder.kart.kernel.Reference
-import eu.simonbinder.kart.kernel.expressions.*
+import eu.simonbinder.kart.kernel.ast.expressions.*
 import eu.simonbinder.kart.transformer.context.InBodyCompilationContext
 import eu.simonbinder.kart.transformer.context.names
 import eu.simonbinder.kart.transformer.identifierOrNull
 import eu.simonbinder.kart.transformer.withIrOffsets
 import org.jetbrains.kotlin.backend.common.serialization.resolveFakeOverride
 import org.jetbrains.kotlin.ir.IrElement
-import org.jetbrains.kotlin.ir.backend.js.utils.realOverrideTarget
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.*
-import org.jetbrains.kotlin.ir.util.isFakeOverriddenFromAny
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
 import org.jetbrains.kotlin.utils.addToStdlib.cast
 

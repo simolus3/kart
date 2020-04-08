@@ -1,6 +1,6 @@
 package eu.simonbinder.kart.transformer
 
-import eu.simonbinder.kart.kernel.members.Component
+import eu.simonbinder.kart.kernel.ast.members.Component
 import eu.simonbinder.kart.kotlin.DartBackendContext
 import eu.simonbinder.kart.transformer.compilers.ModuleCompiler
 import eu.simonbinder.kart.transformer.context.GlobalCompilationContext

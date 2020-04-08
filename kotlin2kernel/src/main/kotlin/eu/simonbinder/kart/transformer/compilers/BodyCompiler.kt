@@ -1,7 +1,7 @@
 package eu.simonbinder.kart.transformer.compilers
 
-import eu.simonbinder.kart.kernel.expressions.Expression
-import eu.simonbinder.kart.kernel.statements.*
+import eu.simonbinder.kart.kernel.ast.expressions.Expression
+import eu.simonbinder.kart.kernel.ast.statements.*
 import eu.simonbinder.kart.transformer.context.InBodyCompilationContext
 import eu.simonbinder.kart.transformer.withIrOffsets
 import org.jetbrains.kotlin.ir.IrElement
