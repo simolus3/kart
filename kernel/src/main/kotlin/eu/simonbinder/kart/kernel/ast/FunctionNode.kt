@@ -19,9 +19,11 @@ enum class AsyncMarker {
 class FunctionNode(
     typeParameters: List<TypeParameter>? = null,
     positionalParameters: List<VariableDeclaration>? = null,
+    var requiredPositionalCount: Int? = null,
     namedParameters: List<VariableDeclaration>? = null,
     val returnType: DartType = VoidType,
     var asyncMarker: AsyncMarker = AsyncMarker.Sync,
+    var dartAsyncMarker: AsyncMarker = asyncMarker,
     body: Statement?
 ) : TreeNode() {
 
@@ -33,6 +35,7 @@ class FunctionNode(
     val body by nullableChild<Statement?>(body)
 
     val totalParameterCount get() = positionalParameters.size + namedParameters.size
+    val requiredPositionalParameters get() = requiredPositionalCount ?: positionalParameters.size
 
     override fun <T> accept(visitor: TreeVisitor<T>): T {
         return visitor.visitFunctionNode(this)

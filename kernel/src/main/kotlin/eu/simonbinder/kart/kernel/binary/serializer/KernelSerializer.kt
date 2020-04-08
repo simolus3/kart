@@ -438,7 +438,7 @@ class KernelSerializer(
         val positionalCount = node.positionalParameters.size
         val namedCount = node.namedParameters.size
         writeUint((positionalCount + namedCount).toUInt())
-        writeUint(positionalCount.toUInt())
+        writeUint(node.requiredPositionalParameters.toUInt())
 
         writeList(node.positionalParameters, this::writeVariableDeclarationNoTag)
         writeList(node.namedParameters, this::writeVariableDeclarationNoTag)

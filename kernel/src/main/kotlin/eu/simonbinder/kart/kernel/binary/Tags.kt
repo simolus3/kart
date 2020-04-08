@@ -70,4 +70,13 @@ object Tags {
     const val SPECIALIZED_VARIABLE_SET = 136u
 
     const val MAGIC = 0x90ABCDEFu
+
+    fun withoutSpecializedPayload(tag: UInt): UInt {
+        // All "special" tags (variable get + set, int literal) have their highest  bit set.
+        // In that case, the lower 3 bit indicate the payload
+        return if (tag and 0x80u == 0x80u) tag and 0xF8u else tag
+    }
+
+    fun specializedPayload(tag: UInt): UInt = tag and 0x7u
+    fun unbiasedSpecializedPayload(tag: UInt) = specializedPayload(tag).toInt() - 3
 }

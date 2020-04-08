@@ -150,6 +150,10 @@ class Reference(var canonicalName: CanonicalName? = null) {
 
     val asProcedure: Procedure? get() = node as Procedure
     val asField: Field? get() = node as Field
+
+    override fun toString(): String {
+        return "Reference to $canonicalName"
+    }
 }
 
 fun CanonicalName.asReference(): Reference {
@@ -170,4 +174,8 @@ class Name(
     }
 
     override fun <T> visitChildren(visitor: Visitor<T>) { }
+
+    override fun toString(): String {
+        return if (libraryReference != null) "$name in $libraryReference" else name
+    }
 }

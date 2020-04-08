@@ -1,5 +1,7 @@
 package eu.simonbinder.kart.kernel.binary.reader
 
+import eu.simonbinder.kart.kernel.ast.members.NonNullableByDefaultCompiledMode
+
 internal class ComponentIndex(
     val startOffset: UInt,
     val offsetForSourceTable: UInt,
@@ -11,4 +13,8 @@ internal class ComponentIndex(
     val mainMethodReference: UInt,
     val compilationMode: UInt,
     val libraryOffsets: UIntArray
-)
+) {
+
+    val nnbdMode get() = NonNullableByDefaultCompiledMode.values()[compilationMode.toInt()]
+
+}

@@ -9,7 +9,7 @@ import eu.simonbinder.kart.kernel.utils.flag
 
 class Library(
     members: MutableList<Member>? = null,
-    val dartVersion: DartVersion = DartVersion.LATEST,
+    var dartVersion: DartVersion = DartVersion.LATEST,
     reference: Reference? = null,
     var fileUri: Uri? = null
 ) : NamedNode(reference), HasFlags, HasMembers {
