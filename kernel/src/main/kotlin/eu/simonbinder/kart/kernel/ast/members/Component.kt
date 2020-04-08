@@ -12,6 +12,7 @@ class Component(
 
     val libraries = children(libraries)
     var mainMethodReference: Reference? = null
+    var nonNullableByDefaultCompiledMode = NonNullableByDefaultCompiledMode.Strong
 
     val sources = mutableMapOf<Uri, Source>()
 

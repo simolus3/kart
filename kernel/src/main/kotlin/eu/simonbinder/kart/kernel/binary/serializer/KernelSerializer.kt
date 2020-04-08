@@ -305,6 +305,7 @@ class KernelSerializer(
         writeUint32(binaryOffsetForStringTable)
         writeUint32(binaryOffsetForConstantTable)
         writeUint32((nameIndexer[node.mainMethodReference?.canonicalName]).toUInt())
+        writeUint32(node.nonNullableByDefaultCompiledMode.ordinal.toUInt())
         libraryOffsets.forEach(this::writeUint32)
         writeUint32(node.libraries.size.toUInt())
         val size = currentOffset - binaryOffsetForComponent + 4u // +4 because we're about to write a 4 byte integer

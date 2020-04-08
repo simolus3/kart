@@ -60,9 +60,14 @@ class KernelReader(
 
     private inline fun <T: Any> readOption(readElement: () -> T): T? = if (readBoolean()) readElement() else null
 
-    private fun readByteList(): ByteArray = ByteArray(readUint().toInt()) { readByte().toByte() }
+    private fun readByteArray(length: UInt): ByteArray {
+        val startOffset = _offset
+        offset += length
+        return input.sliceArray(startOffset until _offset)
+    }
+    private fun readByteArray(): ByteArray = readByteArray(readUint())
 
-    private fun readString(): String = String(readByteList())
+    private fun readString(): String = String(readByteArray())
 
     fun readComponent(): List<Component> {
         if (readUint32() != Tags.MAGIC) error("Invalid Kernel file: Wrong magic bytes")
@@ -134,8 +139,7 @@ class KernelReader(
         val lengths = readList(this::readUint).zipWithNext { a, b -> b - a }
 
         for (length in lengths) {
-            val data = input.sliceArray(_offset .. (_offset + length.toInt()))
-            stringTable.add(String(data))
+            stringTable.add(String(readByteArray(length)))
         }
     }
 }
