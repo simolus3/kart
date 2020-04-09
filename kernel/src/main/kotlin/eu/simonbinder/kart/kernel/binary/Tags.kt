@@ -41,6 +41,7 @@ object Tags {
     const val NEGATIVE_INT_LITERAL = 56u
     const val BIG_INT_LITERAL = 57u
     const val BLOCK_EXPRESSION = 82u
+    const val NULL_CHECK = 117u
 
     const val EXPRESSION_STATEMENT = 61u
     const val BLOCK = 62u

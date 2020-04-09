@@ -507,6 +507,12 @@ class KernelSerializer(
         writeByte(Tags.NULL_LITERAL)
     }
 
+    override fun visitNullCheck(node: NullCheck) {
+        writeByte(Tags.NULL_CHECK)
+        writeFileOffset(node.fileOffset)
+        writeExpression(node.operand)
+    }
+
     override fun visitAsExpression(node: AsExpression) {
         writeByte(Tags.AS_EXPRESSION)
         writeFileOffset(node.fileOffset)

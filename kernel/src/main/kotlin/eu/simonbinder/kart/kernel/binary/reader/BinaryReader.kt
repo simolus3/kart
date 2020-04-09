@@ -25,6 +25,7 @@ class KernelReader(
 
     private val variableStack = mutableListOf<VariableDeclaration>()
     private val typeParameterStack = mutableListOf<TypeParameter>()
+    private val labelStack = mutableListOf<LabeledStatement>()
 
     private fun error(msg: String): Nothing {
         throw ParsingException(msg, offset)
@@ -66,6 +67,8 @@ class KernelReader(
     private fun readUint32(): UInt {
         return (readByte() shl 24) or (readByte() shl 16) or (readByte() shl 8) or readByte()
     }
+
+    private fun readUint32Array(length: Int) = UIntArray(length) { readUint32() }
 
     private fun readDouble(): Double {
         val data = (readUint32().toLong() shl 32) or readUint32().toLong()
@@ -241,11 +244,11 @@ class KernelReader(
         // go back to classCount, skipping procedureOffsets and procedureCount
         offset = endOffset - (procedureCount + 3u) * 4u
         val classCount = readUint32()
-        val procedureOffsets = UIntArray(procedureCount.toInt() + 1) { readUint32() }
+        val procedureOffsets = readUint32Array(procedureCount.toInt() + 1)
 
         // go back to classOffsets
         offset = endOffset - (procedureCount + classCount + 4u) * 4u
-        val classOffsets = UIntArray(classCount.toInt() + 1) { readUint32() }
+        val classOffsets = readUint32Array(classCount.toInt() + 1)
 
         offset = savedOffset
 
@@ -286,6 +289,14 @@ class KernelReader(
         val tag = readUint()
         assert(tag == Tags.CLASS)
 
+        // Read index at the end of the class section
+        val currentOffset = offset
+        offset = classEndOffset - 4u
+        val procedureCount = readUint32()
+        offset = classEndOffset - (procedureCount + 2u) * 4u
+        val procedureOffsets = readUint32Array(procedureCount.toInt() + 1)
+        offset = currentOffset
+
         return typeParameterScope {
             val reference = readReference()
             val fileUri = readUriReference()
@@ -305,6 +316,11 @@ class KernelReader(
                 it.fileOffset = fileOffset
                 it.fileEndOffset = endOffset
                 it.flags = flags
+
+                procedureOffsets.withNext { (start, end) ->
+                    offset = start
+                    it.members.add(readProcedure(end))
+                }
             }
         }
     }
@@ -394,8 +410,51 @@ class KernelReader(
         Tags.EXPRESSION_STATEMENT -> ExpressionStatement(readExpression())
         Tags.BLOCK -> variableScope { Block(readStatements()) }
         Tags.EMPTY_STATEMENT -> EmptyStatement()
+        Tags.LABELED_STATEMENT -> {
+            val label = LabeledStatement().also { labelStack.add(it) }
+            label.body = readStatement()
+            labelStack.removeLast()
+            label
+        }
+        Tags.BREAK_STATEMENT -> {
+            val fileOffset = readFileOffset()
+            BreakStatement(labelStack[readUint().toInt()]).also { it.fileOffset = fileOffset }
+        }
+        Tags.WHILE_STATEMENT -> {
+            val fileOffset = readFileOffset()
+            WhileStatement(readExpression(), readStatement()).also { it.fileOffset = fileOffset }
+        }
+        Tags.DO_STATEMENT -> {
+            val fileOffset = readFileOffset()
+            val body = readStatement()
+            DoStatement(readExpression(), body).also { it.fileOffset = fileOffset }
+        }
+        Tags.IF_STATEMENT -> {
+            val fileOffset = readFileOffset()
+            IfStatement(readExpression(), readStatement(), readStatement()).also { it.fileOffset = fileOffset }
+        }
+        Tags.RETURN_STATEMENT -> {
+            val fileOffset = readFileOffset()
+            ReturnStatement(readOption(this::readExpression)).also { it.fileOffset = fileOffset }
+        }
+        Tags.TRY_CATCH -> {
+            TryCatch(readStatement()).also {
+                it.flags = readByte().toInt()
+                it.catches += readList(this::readCatch)
+            }
+        }
         Tags.VARIABLE_DECLARATION -> readAndPushVariableDeclaration()
         else -> error("Unexpected statement tag: $tag")
+    }
+
+    private fun readCatch(): Catch {
+        val fileOffset = readFileOffset()
+        val guard = readType()
+        val exception = readOption { readAndPushVariableDeclaration() }
+        val stackTrace = readOption { readAndPushVariableDeclaration() }
+        val body = readStatement()
+
+        return Catch(guard, exception, stackTrace, body).also { it.fileOffset = fileOffset }
     }
 
     private fun readAndPushVariableDeclarations(): List<VariableDeclaration> {
@@ -448,6 +507,7 @@ class KernelReader(
             Tags.SPECIALIZED_VARIABLE_GET -> {
                 val fileOffset = readFileOffset()
                 val variable = variableStack[Tags.specializedPayload(tag).toInt()]
+                readUint() // offset for declaration in binary
                 VariableGet(variable).also { it.fileOffset = fileOffset }
             }
             Tags.VARIABLE_SET -> {
@@ -475,6 +535,37 @@ class KernelReader(
                 ConstructorInvocation(readReference(), readArguments()).also { it.fileOffset = fileOffset }
             }
             Tags.NOT -> Not(readExpression())
+            Tags.NULL_CHECK -> {
+                val fileOffset = readFileOffset()
+                NullCheck(readExpression()).also { it.fileOffset = fileOffset }
+            }
+            Tags.LOGICAL_EXPRESSION -> {
+                val left = readExpression()
+                val operator = if (readBoolean()) LogicalOperator.AND else LogicalOperator.OR
+                LogicalExpression(operator, left, readExpression())
+            }
+            Tags.CONDITIONAL_EXPRESSION -> ConditionalExpression(readExpression(), readExpression(), readExpression()).also {
+                it.staticType = readOption(this::readType)
+            }
+            Tags.STRING_CONCATENATION -> {
+                val fileOffset = readFileOffset()
+                StringConcatenation(readExpressions()).also { it.fileOffset = fileOffset }
+            }
+            Tags.STRING_LITERAL -> StringLiteral(readStringReference())
+            Tags.SPECIALIZED_INT_LITERAL -> IntegerLiteral(Tags.unbiasedSpecializedPayload(tag).toLong())
+            Tags.POSITIVE_INT_LITERAL -> IntegerLiteral(readUint().toLong())
+            Tags.NEGATIVE_INT_LITERAL -> IntegerLiteral(-readUint().toLong())
+            Tags.BIG_INT_LITERAL -> IntegerLiteral(readStringReference().toLong())
+            Tags.DOUBLE_LITERAL -> DoubleLiteral(readDouble())
+            Tags.TRUE_LITERAL -> BooleanLiteral(true)
+            Tags.FALSE_LITERAL -> BooleanLiteral(false)
+            Tags.NULL_LITERAL -> NullLiteral()
+            Tags.THIS -> This
+            Tags.THROW -> {
+                val fileOffset = readFileOffset()
+                Throw(readExpression()).also { it.fileOffset = fileOffset }
+            }
+            Tags.BLOCK_EXPRESSION -> BlockExpression(readStatements(), readExpression())
             else -> error("Unexpected expression tag: $tag")
         }
     }
