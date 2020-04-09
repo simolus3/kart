@@ -3,6 +3,7 @@ package eu.simonbinder.kart.kernel.ast.members
 import eu.simonbinder.kart.kernel.*
 import eu.simonbinder.kart.kernel.ast.FunctionNode
 import eu.simonbinder.kart.kernel.ast.TreeVisitor
+import eu.simonbinder.kart.kernel.ast.expressions.Expression
 import eu.simonbinder.kart.kernel.ast.members.initializers.Initializer
 import eu.simonbinder.kart.kernel.utils.HasFlags
 import eu.simonbinder.kart.kernel.utils.child
@@ -18,6 +19,7 @@ class Constructor(
 
     var function by child(function)
     val initializers = children<Initializer>()
+    override val annotations = children<Expression>()
 
     var fileStartOffset: Int = NO_OFFSET
     var fileEndOffset: Int = NO_OFFSET
@@ -39,5 +41,6 @@ class Constructor(
     override fun <T> visitChildren(visitor: TreeVisitor<T>) {
         function.accept(visitor)
         initializers.forEach { it.accept(visitor) }
+        annotations.forEach { it.accept(visitor) }
     }
 }

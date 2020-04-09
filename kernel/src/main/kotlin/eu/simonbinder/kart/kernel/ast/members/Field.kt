@@ -7,6 +7,7 @@ import eu.simonbinder.kart.kernel.Uri
 import eu.simonbinder.kart.kernel.ast.expressions.Expression
 import eu.simonbinder.kart.kernel.types.DartType
 import eu.simonbinder.kart.kernel.utils.HasFlags
+import eu.simonbinder.kart.kernel.utils.children
 import eu.simonbinder.kart.kernel.utils.flag
 import eu.simonbinder.kart.kernel.utils.nullableChild
 
@@ -21,6 +22,7 @@ class Field(
     override var flags: Int = 0
 
     var initializer: Expression? by nullableChild(initializer)
+    override val annotations = children<Expression>()
 
     var isFinal by flag(0)
     var isConst by flag(1)
@@ -45,6 +47,7 @@ class Field(
 
     override fun <T> visitChildren(visitor: TreeVisitor<T>) {
         initializer?.accept(visitor)
+        annotations.forEach { it.accept(visitor) }
     }
 
 }

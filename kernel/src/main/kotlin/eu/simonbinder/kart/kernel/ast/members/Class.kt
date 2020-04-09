@@ -4,6 +4,8 @@ import eu.simonbinder.kart.kernel.ast.NamedNode
 import eu.simonbinder.kart.kernel.Reference
 import eu.simonbinder.kart.kernel.ast.TreeVisitor
 import eu.simonbinder.kart.kernel.Uri
+import eu.simonbinder.kart.kernel.ast.HasAnnotations
+import eu.simonbinder.kart.kernel.ast.expressions.Expression
 import eu.simonbinder.kart.kernel.types.DartType
 import eu.simonbinder.kart.kernel.utils.HasFlags
 import eu.simonbinder.kart.kernel.utils.children
@@ -15,12 +17,13 @@ class Class(
     var fileUri: Uri? = null,
     var superClass: DartType? = null,
     var implementedClasses: MutableList<DartType> = mutableListOf()
-) : NamedNode(reference), HasFlags, HasMembers {
+) : NamedNode(reference), HasFlags, HasMembers, HasAnnotations {
 
     // Note: We set the lowest two bit so that levelBit0 and levelBit1 are set (corresponds to ClassLevel.Body), which
     // Is the only thing we generate
     override var flags: Int = 0b11
     override val members = children<Member>()
+    override val annotations = children<Expression>()
 
     var isAbstract by flag(2)
     var isEnum by flag(3)
@@ -35,6 +38,7 @@ class Class(
 
     override fun <T> visitChildren(visitor: TreeVisitor<T>) {
         members.forEach { it.accept(visitor) }
+        annotations.forEach { it.accept(visitor) }
     }
 
 }

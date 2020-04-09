@@ -1,6 +1,7 @@
 package eu.simonbinder.kart.kernel.ast
 
 import eu.simonbinder.kart.kernel.*
+import eu.simonbinder.kart.kernel.ast.expressions.Expression
 
 abstract class TreeNode : Node {
 
@@ -36,5 +37,8 @@ abstract class NamedNode(reference: Reference? = null) : TreeNode() {
     init {
         this.reference.node = this
     }
+}
 
+interface HasAnnotations {
+    val annotations: MutableList<Expression>
 }

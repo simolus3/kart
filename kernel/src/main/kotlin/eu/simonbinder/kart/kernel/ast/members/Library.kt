@@ -1,8 +1,10 @@
 package eu.simonbinder.kart.kernel.ast.members
 
 import eu.simonbinder.kart.kernel.*
+import eu.simonbinder.kart.kernel.ast.HasAnnotations
 import eu.simonbinder.kart.kernel.ast.NamedNode
 import eu.simonbinder.kart.kernel.ast.TreeVisitor
+import eu.simonbinder.kart.kernel.ast.expressions.Expression
 import eu.simonbinder.kart.kernel.utils.HasFlags
 import eu.simonbinder.kart.kernel.utils.children
 import eu.simonbinder.kart.kernel.utils.flag
@@ -12,7 +14,7 @@ class Library(
     var dartVersion: DartVersion = DartVersion.LATEST,
     reference: Reference? = null,
     var fileUri: Uri? = null
-) : NamedNode(reference), HasFlags, HasMembers {
+) : NamedNode(reference), HasFlags, HasMembers, HasAnnotations {
 
     override var flags: Int = 0
 
@@ -46,6 +48,7 @@ class Library(
     }
 
     override val members = children(members)
+    override val annotations = children<Expression>()
     val classes = children<Class>()
     var name: String? = null
 
@@ -65,6 +68,7 @@ class Library(
     override fun <T> visitChildren(visitor: TreeVisitor<T>) {
         members.forEach { it.accept(visitor) }
         classes.forEach { it.accept(visitor) }
+        annotations.forEach { it.accept(visitor) }
     }
 
 }

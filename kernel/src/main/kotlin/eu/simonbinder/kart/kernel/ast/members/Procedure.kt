@@ -3,7 +3,9 @@ package eu.simonbinder.kart.kernel.ast.members
 import eu.simonbinder.kart.kernel.*
 import eu.simonbinder.kart.kernel.ast.FunctionNode
 import eu.simonbinder.kart.kernel.ast.TreeVisitor
+import eu.simonbinder.kart.kernel.ast.expressions.Expression
 import eu.simonbinder.kart.kernel.utils.HasFlags
+import eu.simonbinder.kart.kernel.utils.children
 import eu.simonbinder.kart.kernel.utils.flag
 import eu.simonbinder.kart.kernel.utils.nullableChild
 
@@ -32,6 +34,7 @@ class Procedure(
     override var flags: Int = 0
 
     val function by nullableChild<FunctionNode?>(function)
+    override val annotations = children<Expression>()
 
     var isStatic by flag(0)
     var isAbstract by flag(1)
@@ -49,5 +52,6 @@ class Procedure(
 
     override fun <T> visitChildren(visitor: TreeVisitor<T>) {
         function?.accept(visitor)
+        annotations.forEach { it.accept(visitor) }
     }
 }

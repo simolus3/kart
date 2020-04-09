@@ -309,7 +309,7 @@ class KernelReader(
             val endOffset = readFileOffset()
             val flags = readByte().toInt()
             val name = readStringReference()
-            readExpressions() // todo annotations
+            val annotations = readExpressions()
             readAndPushTypeParameters() // todo type parameters
             val superClass = readOption(this::readType)
             readOption(this::readType) // skip mixedInType
@@ -320,6 +320,7 @@ class KernelReader(
                 it.fileOffset = fileOffset
                 it.fileEndOffset = endOffset
                 it.flags = flags
+                it.annotations += annotations
 
                 readList(this::readField).forEach { field -> it.members += field }
                 readList(this::readConstructor).forEach { constructor -> it.members += constructor }
@@ -344,7 +345,7 @@ class KernelReader(
         val kind = ProcedureKind.values()[readByte().toInt()]
         val flags = readUint().toInt()
         val name = readName()
-        readExpressions() // todo annotations
+        val annotations = readExpressions()
         readReference() // forwardingStubSuperTarget, ignore
         readReference() // forwardingStubInterfaceTarget, ignore
         val function = readOption(this::readFunctionNode)
@@ -354,6 +355,7 @@ class KernelReader(
             it.fileOffset = fileOffset
             it.fileEndOffset = fileEndOffset
             it.flags = flags
+            it.annotations += annotations
         }
     }
 
@@ -367,7 +369,7 @@ class KernelReader(
         val fileEndOffset = readFileOffset()
         val flags = readUint().toInt()
         val name = readName()
-        readExpressions() // todo annotations
+        val annotations = readExpressions()
         val type = readType()
         val initializer = readOption(this::readExpression)
 
@@ -375,6 +377,7 @@ class KernelReader(
             it.fileOffset = fileOffset
             it.fileEndOffset = fileEndOffset
             it.flags = flags
+            it.annotations += annotations
         }
     }
 
@@ -389,7 +392,7 @@ class KernelReader(
         val fileEndOffset = readFileOffset()
         val flags = readByte().toInt()
         val name = readName()
-        readExpressions() // todo annotations
+        val annotations = readExpressions()
         val function = readFunctionNode()
         val initializers = readList(this::readInitializer)
 
@@ -399,6 +402,7 @@ class KernelReader(
             it.fileEndOffset = fileEndOffset
             it.flags = flags
             it.initializers += initializers
+            it.annotations += annotations
         }
     }
 
@@ -522,7 +526,7 @@ class KernelReader(
     private fun readVariableDeclaration(): VariableDeclaration {
         val fileOffset = readFileOffset()
         val fileEqualsOffset = readFileOffset()
-        readExpressions() // todo annotations
+        val annotations = readExpressions()
         val flags = readByte().toInt()
         val name = readStringReference()
         val type = readType()
@@ -532,6 +536,7 @@ class KernelReader(
             it.fileOffset = fileOffset
             it.fileEqualsOffset = fileEqualsOffset
             it.flags = flags
+            it.annotations += annotations
         }
     }
 

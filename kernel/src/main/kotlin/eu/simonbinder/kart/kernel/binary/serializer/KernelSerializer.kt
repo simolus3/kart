@@ -322,7 +322,7 @@ class KernelSerializer(
         writeUriReference(node.fileUri)
         writeUint(0u) // no problems
 
-        writeUint(0u) // no annotations
+        writeExpressions(node.annotations)
         writeUint(0u) // no library dependencies
         writeUint(0u) // no additional exports
         writeUint(0u) // no library parts
@@ -350,7 +350,7 @@ class KernelSerializer(
         writeFileOffset(node.fileEndOffset)
         writeByte(node.flags.toUInt())
         writeStringReference(node.name)
-        writeUint(0u) // empty list of annotations
+        writeExpressions(node.annotations)
         writeUint(0u) // empty type parameters list
         writeOption(node.superClass, this::writeType)
         writeOption(null) { throw AssertionError() } // mixedInType
@@ -373,7 +373,7 @@ class KernelSerializer(
             writeFileOffset(node.fileEndOffset)
             writeByte(node.flags.toUInt())
             writeName(node.name)
-            writeUint(0u) // empty list of annotations
+            writeExpressions(node.annotations)
             visitFunctionNode(node.function)
 
             // Parameters are in scope in the initializers
@@ -391,7 +391,7 @@ class KernelSerializer(
             writeFileOffset(node.fileEndOffset)
             writeUint(node.flags.toUInt()) // Note: Fields have more than 8 flags, so use uint instead of byte
             writeName(node.name)
-            writeUint(0u) // annotations: List<Expression>
+            writeExpressions(node.annotations)
             writeType(node.type)
             writeOption(node.initializer, this::writeExpression)
         }
@@ -408,7 +408,7 @@ class KernelSerializer(
             writeByte(node.kind.ordinal.toUInt())
             writeUint(node.flags.toUInt())
             visitName(node.name ?: emptyName)
-            writeUint(0u) // annotations
+            writeExpressions(node.annotations)
             writeReference(null) // forwarding stub super target reference
             writeReference(null) // forwarding stub interface target reference
             writeOption(node.function, this::visitFunctionNode)
@@ -452,6 +452,8 @@ class KernelSerializer(
     }
 
     // Expressions
+
+    private fun writeExpressions(expressions: Collection<Expression>) = writeList(expressions, this::writeExpression)
 
     private fun writeExpression(expression: Expression) {
         expression.accept(this)
@@ -770,7 +772,7 @@ class KernelSerializer(
         relevantNodeOffsets[node] = currentOffset
         writeFileOffset(node.fileOffset)
         writeFileOffset(node.fileEqualsOffset)
-        writeUint(0u) // annotations
+        writeExpressions(node.annotations)
         writeByte(node.flags.toUInt())
         writeStringReference(node.name ?: "")
         writeType(node.type)
