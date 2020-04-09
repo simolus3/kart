@@ -6,6 +6,10 @@ import eu.simonbinder.kart.kernel.ast.AsyncMarker
 import eu.simonbinder.kart.kernel.ast.FunctionNode
 import eu.simonbinder.kart.kernel.ast.expressions.*
 import eu.simonbinder.kart.kernel.ast.members.*
+import eu.simonbinder.kart.kernel.ast.members.initializers.FieldInitializer
+import eu.simonbinder.kart.kernel.ast.members.initializers.Initializer
+import eu.simonbinder.kart.kernel.ast.members.initializers.RedirectingInitializer
+import eu.simonbinder.kart.kernel.ast.members.initializers.SuperInitializer
 import eu.simonbinder.kart.kernel.ast.statements.*
 import eu.simonbinder.kart.kernel.binary.Tags
 import eu.simonbinder.kart.kernel.types.*
@@ -317,6 +321,9 @@ class KernelReader(
                 it.fileEndOffset = endOffset
                 it.flags = flags
 
+                readList(this::readField).forEach { field -> it.members += field }
+                readList(this::readConstructor).forEach { constructor -> it.members += constructor }
+
                 procedureOffsets.withNext { (start, end) ->
                     offset = start
                     it.members.add(readProcedure(end))
@@ -347,6 +354,51 @@ class KernelReader(
             it.fileOffset = fileOffset
             it.fileEndOffset = fileEndOffset
             it.flags = flags
+        }
+    }
+
+    private fun readField(): Field {
+         val tag = readUint()
+        assert(tag == Tags.FIELD)
+
+        val reference = readReference()
+        val uri = readUriReference()
+        val fileOffset = readFileOffset()
+        val fileEndOffset = readFileOffset()
+        val flags = readUint().toInt()
+        val name = readName()
+        readExpressions() // todo annotations
+        val type = readType()
+        val initializer = readOption(this::readExpression)
+
+        return Field(name, reference, type, initializer, uri).also {
+            it.fileOffset = fileOffset
+            it.fileEndOffset = fileEndOffset
+            it.flags = flags
+        }
+    }
+
+    private fun readConstructor(): Constructor {
+        val tag = readUint()
+        assert(tag == Tags.CONSTRUCTOR)
+
+        val reference = readReference()
+        val fileUri = readUriReference()
+        val fileStartOffset = readFileOffset()
+        val fileOffset = readFileOffset()
+        val fileEndOffset = readFileOffset()
+        val flags = readByte().toInt()
+        val name = readName()
+        readExpressions() // todo annotations
+        val function = readFunctionNode()
+        val initializers = readList(this::readInitializer)
+
+        return Constructor(reference, name, fileUri, function).also {
+            it.fileStartOffset = fileStartOffset
+            it.fileOffset = fileOffset
+            it.fileEndOffset = fileEndOffset
+            it.flags = flags
+            it.initializers += initializers
         }
     }
 
@@ -608,6 +660,24 @@ class KernelReader(
             Tags.SIMPLE_INTERFACE_TYPE -> InterfaceType(readNullability(), readReference())
             else -> TODO()
         }
+    }
+
+    private fun readInitializer(): Initializer {
+        val tag = readByte()
+        val isSynthetic = readBoolean()
+
+        return when (tag) {
+            Tags.FIELD_INITIALIZER -> FieldInitializer(readReference(), readExpression())
+            Tags.SUPER_INITIALIZER -> {
+                val fileOffset = readFileOffset()
+                SuperInitializer(readReference(), readArguments()).also { it.fileOffset = fileOffset }
+            }
+            Tags.REDIRECTING_INITIALIZER -> {
+                val fileOffset = readFileOffset()
+                RedirectingInitializer(readReference(), readArguments()).also { it.fileOffset = fileOffset }
+            }
+            else -> TODO()
+        }.also { initializer -> initializer.isSynthetic = isSynthetic }
     }
 
 }

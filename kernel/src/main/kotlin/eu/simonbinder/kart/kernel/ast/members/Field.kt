@@ -12,7 +12,7 @@ import eu.simonbinder.kart.kernel.utils.nullableChild
 
 class Field(
     var name: Name,
-    reference: Reference,
+    reference: Reference?,
     var type: DartType,
     initializer: Expression? = null,
     var fileUri: Uri? = null
