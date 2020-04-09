@@ -8,7 +8,6 @@ import eu.simonbinder.kart.kernel.ast.members.Procedure
 import eu.simonbinder.kart.kernel.types.DartType
 
 class Arguments(
-    val arguments: Int = 0,
     val typeParameters: List<DartType> = emptyList(),
     val positional: List<Expression> = emptyList(),
     val named: List<NamedExpression> = emptyList()

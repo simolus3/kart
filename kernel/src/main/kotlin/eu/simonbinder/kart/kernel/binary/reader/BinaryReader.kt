@@ -4,10 +4,7 @@ import eu.simonbinder.kart.kernel.*
 import eu.simonbinder.kart.kernel.DartVersion.Companion.SUPPORTED_KERNEL_VERSIONS
 import eu.simonbinder.kart.kernel.ast.AsyncMarker
 import eu.simonbinder.kart.kernel.ast.FunctionNode
-import eu.simonbinder.kart.kernel.ast.expressions.Expression
-import eu.simonbinder.kart.kernel.ast.expressions.InvalidExpression
-import eu.simonbinder.kart.kernel.ast.expressions.VariableGet
-import eu.simonbinder.kart.kernel.ast.expressions.VariableSet
+import eu.simonbinder.kart.kernel.ast.expressions.*
 import eu.simonbinder.kart.kernel.ast.members.*
 import eu.simonbinder.kart.kernel.ast.statements.*
 import eu.simonbinder.kart.kernel.binary.Tags
@@ -27,6 +24,7 @@ class KernelReader(
     private val sourceUriTable = mutableListOf<Uri>()
 
     private val variableStack = mutableListOf<VariableDeclaration>()
+    private val typeParameterStack = mutableListOf<TypeParameter>()
 
     private fun error(msg: String): Nothing {
         throw ParsingException(msg, offset)
@@ -267,6 +265,11 @@ class KernelReader(
             library.members.add(readProcedure(end))
         }
 
+        classOffsets.withNext { (start, end) ->
+            offset = start
+            library.classes.add(readClass(end))
+        }
+
         return library
     }
 
@@ -276,6 +279,33 @@ class KernelReader(
             Name(name, readReference())
         } else {
             Name(name)
+        }
+    }
+
+    private fun readClass(classEndOffset: UInt): Class {
+        val tag = readUint()
+        assert(tag == Tags.CLASS)
+
+        return typeParameterScope {
+            val reference = readReference()
+            val fileUri = readUriReference()
+            val startOffset = readFileOffset()
+            val fileOffset = readFileOffset()
+            val endOffset = readFileOffset()
+            val flags = readByte().toInt()
+            val name = readStringReference()
+            readExpressions() // todo annotations
+            readAndPushTypeParameters() // todo type parameters
+            val superClass = readOption(this::readType)
+            readOption(this::readType) // skip mixedInType
+            val implementedClasses = readTypes().toMutableList()
+
+            Class(reference, name, fileUri, superClass, implementedClasses).also {
+                it.startFileOffset = startOffset
+                it.fileOffset = fileOffset
+                it.fileEndOffset = endOffset
+                it.flags = flags
+            }
         }
     }
 
@@ -291,7 +321,7 @@ class KernelReader(
         val kind = ProcedureKind.values()[readByte().toInt()]
         val flags = readUint().toInt()
         val name = readName()
-        readList(this::readExpression) // todo annotations
+        readExpressions() // todo annotations
         readReference() // forwardingStubSuperTarget, ignore
         readReference() // forwardingStubInterfaceTarget, ignore
         val function = readOption(this::readFunctionNode)
@@ -304,14 +334,21 @@ class KernelReader(
         }
     }
 
-    private inline fun <T> scoped(body: () -> T): T {
-        val oldVariableStackSize = variableStack.size
-        try {
-            return body()
-        } finally {
-            val addedInBody = variableStack.size - oldVariableStackSize
-            variableStack.dropLast(addedInBody)
-        }
+    private inline fun <T> scopedImpl(stack: MutableList<out Any?>, crossinline body: () -> T): T {
+        val oldStackSize = stack.size
+
+        val result = body()
+
+        val addedInBody = stack.size - oldStackSize
+        stack.dropLast(addedInBody)
+
+        return result
+    }
+
+    private inline fun <T> variableScope(crossinline body: () -> T): T = scopedImpl(variableStack, body)
+    private inline fun <T> typeParameterScope(crossinline body: () -> T): T = scopedImpl(typeParameterStack, body)
+    private inline fun <T> variableAndTypeParameterScope(crossinline body: () -> T): T {
+        return scopedImpl(variableStack) { scopedImpl(typeParameterStack, body) }
     }
 
     private fun readVariableReference() = variableStack[readUint().toInt()]
@@ -320,13 +357,13 @@ class KernelReader(
         val tag = readUint()
         assert(tag == Tags.FUNCTION_NODE)
 
-        return scoped {
+        return variableAndTypeParameterScope {
             val offset = readFileOffset()
             val endOffset = readFileOffset()
             val asyncMarker = AsyncMarker.values()[readUint().toInt()]
             val dartAsyncMarker = AsyncMarker.values()[readUint().toInt()]
 
-            val typeParameters = readList(this::readTypeParameter)
+            val typeParameters = readAndPushTypeParameters()
             readUint().toInt() // total parameter count. Not needed because they're lists
             val requiredParameterCount = readUint().toInt()
             val positionalParameters = readAndPushVariableDeclarations()
@@ -353,23 +390,46 @@ class KernelReader(
 
     private fun readStatements(): List<Statement> = readList(this::readStatement)
 
-    private fun readStatement(): Statement = when (readByte()) {
+    private fun readStatement(): Statement = when (val tag = readByte()) {
         Tags.EXPRESSION_STATEMENT -> ExpressionStatement(readExpression())
-        Tags.BLOCK -> scoped { Block(readStatements()) }
+        Tags.BLOCK -> variableScope { Block(readStatements()) }
         Tags.EMPTY_STATEMENT -> EmptyStatement()
-        else -> TODO()
+        Tags.VARIABLE_DECLARATION -> readAndPushVariableDeclaration()
+        else -> error("Unexpected statement tag: $tag")
     }
 
     private fun readAndPushVariableDeclarations(): List<VariableDeclaration> {
-        return readList {
-            val declaration = readVariableDeclaration()
-            variableStack.add(declaration)
-            declaration
+        return readList(this::readAndPushVariableDeclaration)
+    }
+
+    private fun readAndPushVariableDeclaration(): VariableDeclaration {
+        return readVariableDeclaration().also {
+            variableStack.add(it)
         }
     }
 
     private fun readVariableDeclaration(): VariableDeclaration {
-        TODO()
+        val fileOffset = readFileOffset()
+        val fileEqualsOffset = readFileOffset()
+        readExpressions() // todo annotations
+        val flags = readByte().toInt()
+        val name = readStringReference()
+        val type = readType()
+        val initializer = readOption(this::readExpression)
+
+        return VariableDeclaration(name, type, initializer).also {
+            it.fileOffset = fileOffset
+            it.fileEqualsOffset = fileEqualsOffset
+            it.flags = flags
+        }
+    }
+
+    private fun readExpressions(): List<Expression> {
+        return readList(this::readExpression)
+    }
+
+    private fun readNamedExpression(): NamedExpression {
+        return NamedExpression(readStringReference(), readExpression())
     }
 
     private fun readExpression(): Expression {
@@ -400,13 +460,45 @@ class KernelReader(
                 val variable = variableStack[Tags.specializedPayload(tag).toInt()]
                 VariableSet(variable, readExpression()).also { it.fileOffset = fileOffset }
             }
-            else -> TODO()
+            Tags.METHOD_INVOCATION -> {
+                val fileOffset = readFileOffset()
+                MethodInvocation(readExpression(), readName(), readArguments(), readReference()).also {
+                    it.fileOffset = fileOffset
+                }
+            }
+            Tags.STATIC_INVOCATION -> {
+                val fileOffset = readFileOffset()
+                StaticInvocation(readReference()!!, readArguments()).also { it.fileOffset = fileOffset }
+            }
+            Tags.CONSTRUCTOR_INVOCATION -> {
+                val fileOffset = readFileOffset()
+                ConstructorInvocation(readReference(), readArguments()).also { it.fileOffset = fileOffset }
+            }
+            Tags.NOT -> Not(readExpression())
+            else -> error("Unexpected expression tag: $tag")
+        }
+    }
+
+    private fun readArguments(): Arguments {
+        readUint() // positional.length + named.length
+        val typeParameters = readTypes()
+        val positional = readExpressions()
+        val named = readList(this::readNamedExpression)
+
+        return Arguments(typeParameters, positional, named)
+    }
+
+    private fun readAndPushTypeParameters(): List<TypeParameter> {
+        return readList {
+            readTypeParameter().also { typeParameterStack.add(it) }
         }
     }
 
     private fun readTypeParameter(): TypeParameter {
         TODO()
     }
+
+    private fun readTypes(): List<DartType> = readList(this::readType)
 
     private fun readType(): DartType {
         fun readNullability(): Nullability {

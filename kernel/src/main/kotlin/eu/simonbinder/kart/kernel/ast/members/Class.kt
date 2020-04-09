@@ -10,8 +10,8 @@ import eu.simonbinder.kart.kernel.utils.children
 import eu.simonbinder.kart.kernel.utils.flag
 
 class Class(
-    reference: Reference,
-    var name: String = reference.canonicalName?.name ?: "",
+    reference: Reference?,
+    var name: String = reference?.canonicalName?.name ?: "",
     var fileUri: Uri? = null,
     var superClass: DartType? = null,
     var implementedClasses: MutableList<DartType> = mutableListOf()
