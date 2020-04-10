@@ -3,7 +3,7 @@ library from "rootKt" as roo {
 
   class Foo extends core::Object {
     field core::String x_field;
-    constructor •(final core::String x) → roo::Foo
+    constructor qU81zP0(final core::String x) → roo::Foo
       : super core::Object::•() {
       {
         this.{roo::Foo::x_field} = x;
@@ -18,7 +18,7 @@ library from "rootKt" as roo {
   }
   class Foo$Bar extends core::Object {
     field roo::Foo this$outer_field;
-    constructor •(final roo::Foo $outer) → roo::Foo$Bar
+    constructor KzMMwLM(final roo::Foo $outer) → roo::Foo$Bar
       : roo::Foo$Bar::this$outer_field = $outer, super core::Object::•() {
       {}
     }
@@ -27,8 +27,8 @@ library from "rootKt" as roo {
     }
   }
   static method main() → void {
-    final roo::Foo foo = new roo::Foo::•("hi");
-    final roo::Foo$Bar bar = new roo::Foo$Bar::•(foo);
+    final roo::Foo foo = new roo::Foo::qU81zP0("hi");
+    final roo::Foo$Bar bar = new roo::Foo$Bar::KzMMwLM(foo);
     core::print(bar);
   }
 }

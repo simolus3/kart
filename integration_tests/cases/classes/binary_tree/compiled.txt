@@ -5,7 +5,7 @@ library from "input" as inp {
     field core::int value_field;
     field inp::BinaryTree? left_field;
     field inp::BinaryTree? right_field;
-    constructor •(final core::int value, final inp::BinaryTree? left, final inp::BinaryTree? right) → inp::BinaryTree
+    constructor Gb7jNj4(final core::int value, final inp::BinaryTree? left, final inp::BinaryTree? right) → inp::BinaryTree
       : super core::Object::•() {
       {
         this.{inp::BinaryTree::value_field} = value;
@@ -23,7 +23,7 @@ library from "input" as inp {
       return this.{inp::BinaryTree::right_field};
     }
   }
-  static method search(final inp::BinaryTree $this, final core::int key) → inp::BinaryTree? {
+  static method search-OrShl-Y(final inp::BinaryTree $this, final core::int key) → inp::BinaryTree? {
     inp::BinaryTree $this = $this;
     core::int key = key;
     #L1:
@@ -62,7 +62,7 @@ library from "input" as inp {
       }
   }
   static method main() → void {
-    final inp::BinaryTree node = new inp::BinaryTree::•(3, new inp::BinaryTree::•(2, null, null), new inp::BinaryTree::•(4, null, null));
-    core::print(inp::search(6));
+    final inp::BinaryTree node = new inp::BinaryTree::Gb7jNj4(3, new inp::BinaryTree::Gb7jNj4(2, null, null), new inp::BinaryTree::Gb7jNj4(4, null, null));
+    core::print(inp::search-OrShl-Y(6));
   }
 }

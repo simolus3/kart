@@ -43,7 +43,6 @@ class CompilationInfo(
     }
 
     fun dartTypeFor(irType: IrType): DartType {
-        irType.isFunction()
         val intrinsic = dartIntrinsics.intrinsicType(irType)
         if (intrinsic != null) return intrinsic
 

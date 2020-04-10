@@ -3,7 +3,7 @@ library from "rootKt" as roo {
 
   class Foo extends core::Object {
     field core::String x_field;
-    constructor •(final core::String x) → roo::Foo
+    constructor qU81zP0(final core::String x) → roo::Foo
       : super core::Object::•() {
       {
         this.{roo::Foo::x_field} = x;
@@ -15,12 +15,12 @@ library from "rootKt" as roo {
     method component1() → core::String {
       return this.{roo::Foo::x_field};
     }
-    method copy(final core::String x) → roo::Foo {
-      return new roo::Foo::•(x);
+    method copy-qU81zP0(final core::String x) → roo::Foo {
+      return new roo::Foo::qU81zP0(x);
     }
-    method copy$default(final core::String? x, final core::int $mask0) → roo::Foo {
+    method copy$default-QXTnhkQ(final core::String? x, final core::int $mask0) → roo::Foo {
       final core::String? x = !$mask0.{core::int::&}(1).{core::Object::==}(0) ? this.{roo::Foo::x_field} : x;
-      return this.{roo::Foo::copy}(x);
+      return this.{roo::Foo::copy-qU81zP0}(x);
     }
     method toString() → core::String {
       return "Foo(x=${this.{roo::Foo::x_field}})";
@@ -40,9 +40,9 @@ library from "rootKt" as roo {
     }
   }
   static method main() → void {
-    final roo::Foo foo = new roo::Foo::•("hello world");
-    final roo::Foo foo2 = new roo::Foo::•("hello world");
-    final roo::Foo bar = new roo::Foo::•("no");
+    final roo::Foo foo = new roo::Foo::qU81zP0("hello world");
+    final roo::Foo foo2 = new roo::Foo::qU81zP0("hello world");
+    final roo::Foo bar = new roo::Foo::qU81zP0("no");
     core::print(foo);
     core::print("foo == foo2: ${foo.{core::Object::==}(foo2)}. hash equals: ${foo.{core::Object::hashCode}.{core::Object::==}(foo2.{core::Object::hashCode})}");
     core::print("foo == bar: ${foo.{core::Object::==}(bar)}. hash equals: ${foo.{core::Object::hashCode}.{core::Object::==}(bar.{core::Object::hashCode})}");

@@ -4,7 +4,7 @@ library from "rootKt" as roo {
   abstract class Base extends core::Object {
     abstract method m1() → core::int;
     abstract method m2() → core::int;
-    static method m2$defaultImpl(final roo::Base this) → core::int {
+    static method m2$defaultImpl-MwfMfWE(final roo::Base this) → core::int {
       return this.{roo::Base::m1}().{core::num::*}(2);
     }
   }
@@ -13,8 +13,8 @@ library from "rootKt" as roo {
   }
   abstract class Chained extends core::Object implements roo::Base, roo::Another {
     abstract method m3() → core::int;
-    static method m3$defaultImpl(final roo::Chained this) → core::int {
-      return this.{roo::Base::m2}().{core::num::+}(roo::Base::m2$defaultImpl(this));
+    static method m3$defaultImpl-A7ldp4Y(final roo::Chained this) → core::int {
+      return this.{roo::Base::m2}().{core::num::+}(roo::Base::m2$defaultImpl-MwfMfWE(this));
     }
   }
   class Impl extends core::Object implements roo::Chained {
@@ -29,7 +29,7 @@ library from "rootKt" as roo {
       return 1;
     }
     method m3() → core::int {
-      return roo::Chained::m3$defaultImpl(this);
+      return roo::Chained::m3$defaultImpl-A7ldp4Y(this);
     }
   }
   static method main() → void {

@@ -1,7 +1,7 @@
 main = fib::main;
 library from "fibonacci" as fib {
 
-  static method fibonacci(final core::int n, final core::int a, final core::int b) → core::int {
+  static method fibonacci-7QLt08o(final core::int n, final core::int a, final core::int b) → core::int {
     core::int n = n;
     core::int a = a;
     core::int b = b;
@@ -31,13 +31,13 @@ library from "fibonacci" as fib {
         break #L1;
       }
   }
-  static method fibonacci$default(final core::int n, final core::int a, final core::int b, final core::int $mask0) → core::int {
+  static method fibonacci$default-aUeqA3E(final core::int n, final core::int a, final core::int b, final core::int $mask0) → core::int {
     final core::int n = n;
     final core::int a = !$mask0.{core::int::&}(2).{core::Object::==}(0) ? 0 : a;
     final core::int b = !$mask0.{core::int::&}(4).{core::Object::==}(0) ? 1 : b;
-    return fib::fibonacci(n, a, b);
+    return fib::fibonacci-7QLt08o(n, a, b);
   }
   static method main() → void {
-    core::print(fib::fibonacci$default(5, 0, 0, 6));
+    core::print(fib::fibonacci$default-aUeqA3E(5, 0, 0, 6));
   }
 }

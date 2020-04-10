@@ -8,6 +8,7 @@ import eu.simonbinder.kart.kotlin.DartBackendContext
 import eu.simonbinder.kart.transformer.identifierOrNull
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.util.*
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 class Names(private val backendContext: DartBackendContext) {
@@ -19,7 +20,13 @@ class Names(private val backendContext: DartBackendContext) {
     private val declarationToName: MutableMap<IrDeclaration, Reference> = mutableMapOf()
 
     fun nameFor(declaration: IrDeclaration): Reference = declarationToName.getOrPut(declaration) {
-        val library = nameFor(declaration.file)
+        val containingPackage = declaration.getPackageFragment()
+        val library = if (containingPackage is IrExternalPackageFragment) {
+            nameForFqn(containingPackage.fqName)
+        } else {
+            nameFor(declaration.file)
+        }
+
         val baseName = if (declaration.parent is IrClass) {
             nameFor(declaration.parentAsClass).canonicalName!!
         } else {
@@ -52,7 +59,7 @@ class Names(private val backendContext: DartBackendContext) {
                 baseName.getChild(nameOfClass)
             }
             is IrConstructor -> {
-                val nameOfConstructor = changedUnqualifiedName ?: declaration.name.identifierOrNull ?: ""
+                val nameOfConstructor = changedUnqualifiedName ?: NameMangling.mangledNameFor(declaration)
                 baseName.getChild(CanonicalName.CONSTRUCTORS).getChild(nameOfConstructor)
             }
             else -> TODO()
@@ -69,14 +76,19 @@ class Names(private val backendContext: DartBackendContext) {
             simpleNameFor((declaration as IrSimpleFunction).correspondingPropertySymbol!!.owner, false)
         } else if (includeField && declaration is IrField) {
             DartName(declaration.name.identifier + "_field")
+        }  else if (declaration is IrFunction) {
+            DartName(NameMangling.mangledNameFor(declaration))
         } else {
             DartName(declaration.nameForIrSerialization.identifier)
         }
     }
 
     fun nameFor(file: IrFile): Reference = fileToName.computeIfAbsent(file) {
-        val fqn = file.fqName
+        nameForFqn(file.fqName)
+    }
+
+    private fun nameForFqn(fqn: FqName): Reference {
         val name = root.getSubChild(if (fqn.isRoot) listOf("rootKt") else fqn.pathSegments().map(Name::getIdentifier))
-        Reference(name)
+        return name.asReference()
     }
 }

@@ -1,6 +1,5 @@
 package eu.simonbinder.kart.transformer.compilers
 
-import eu.simonbinder.kart.kernel.Name
 import eu.simonbinder.kart.kernel.asReference
 import eu.simonbinder.kart.kernel.ast.expressions.Arguments
 import eu.simonbinder.kart.kernel.ast.members.Constructor
@@ -91,7 +90,7 @@ object ClassMemberCompiler : BaseMemberCompiler<InClassContext>() {
 
         val dartConstructor = Constructor(
             reference = data.names.nameFor(declaration),
-            name = Name(""),
+            name = data.names.simpleNameFor(declaration),
             fileUri = data.info.loadFile(declaration.file),
             function = compileFunctionNodeWithContextAndParameters(declaration, context, parameters, body)
         )
