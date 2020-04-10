@@ -4,13 +4,16 @@ import eu.simonbinder.kart.kernel.ast.TreeNode
 import eu.simonbinder.kart.kernel.types.DartType
 import eu.simonbinder.kart.kernel.types.InterfaceType
 import eu.simonbinder.kart.kernel.types.Nullability
+import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.ir.IrElement
+import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.expressions.IrBlock
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.impl.IrBlockBodyImpl
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.util.parentAsClass
 import org.jetbrains.kotlin.name.Name
 
 fun <T : TreeNode> T.withIrOffsets(ir: IrElement): T {
@@ -33,4 +36,8 @@ fun DartType.withNullabilityOfIr(type: IrType): DartType {
 
     val nullable = (type as? IrSimpleType)?.hasQuestionMark ?: false
     return withNullability(if (nullable) Nullability.NULLABLE else Nullability.NON_NULLABLE)
+}
+
+fun IrConstructor.isDartConstant(): Boolean {
+    return parentAsClass.kind == ClassKind.ANNOTATION_CLASS
 }

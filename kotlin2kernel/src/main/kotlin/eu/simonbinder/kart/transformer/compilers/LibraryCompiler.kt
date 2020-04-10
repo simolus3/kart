@@ -6,10 +6,14 @@ import eu.simonbinder.kart.transformer.context.InClassContext
 import eu.simonbinder.kart.transformer.context.InLibraryContext
 import eu.simonbinder.kart.transformer.context.names
 import eu.simonbinder.kart.transformer.identifierOrNull
+import eu.simonbinder.kart.transformer.isDartConstant
+import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.types.classOrNull
+import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.isInterface
 
@@ -50,12 +54,13 @@ object LibraryCompiler : BaseMemberCompiler<InLibraryContext>() {
             fileUri = data.info.loadFile(declaration.file),
             superClass = superClass,
             implementedClasses = superInterfaces
-        )
-
-        dartClass.isAbstract = declaration.modality == Modality.ABSTRACT
-        dartClass.fileOffset = declaration.startOffset
-        dartClass.startFileOffset = declaration.startOffset
-        dartClass.fileEndOffset = declaration.endOffset
+        ).apply {
+            isAbstract = declaration.modality == Modality.ABSTRACT
+            fileOffset = declaration.startOffset
+            startFileOffset = declaration.startOffset
+            fileEndOffset = declaration.endOffset
+            hasConstConstructor = declaration.constructors.any { it.isDartConstant() }
+        }
 
         val contextForChildren = InClassContext(data, dartClass)
         declaration.acceptChildren(ClassMemberCompiler, contextForChildren)

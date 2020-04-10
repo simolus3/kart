@@ -9,6 +9,7 @@ import eu.simonbinder.kart.kernel.ast.members.initializers.RedirectingInitialize
 import eu.simonbinder.kart.kernel.ast.members.initializers.SuperInitializer
 import eu.simonbinder.kart.transformer.context.InClassContext
 import eu.simonbinder.kart.transformer.context.names
+import eu.simonbinder.kart.transformer.isDartConstant
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.expressions.*
@@ -95,6 +96,7 @@ object ClassMemberCompiler : BaseMemberCompiler<InClassContext>() {
             function = compileFunctionNodeWithContextAndParameters(declaration, context, parameters, body)
         )
         initializers.forEach { dartConstructor.initializers.add(it) }
+        dartConstructor.isConst = declaration.isDartConstant()
 
         data.target.members.add(dartConstructor)
     }

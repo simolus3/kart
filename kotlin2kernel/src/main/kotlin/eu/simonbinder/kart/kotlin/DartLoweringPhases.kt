@@ -42,6 +42,12 @@ private val expectDeclarationsRemovingPhase = makeIrModulePhase(
     description = "Remove expect declaration from module fragment"
 )
 
+private val annotationClassLoweringPhase = makeIrModulePhase(
+    ::AnnotationClassLowering,
+    name = "AnnotationClassLowering",
+    description = "Add a body to the primary annotation class constructor"
+)
+
 private val stripTypeAliasDeclarationsPhase = makeIrModulePhase<CommonBackendContext>(
     { StripTypeAliasDeclarationsLowering() },
     name = "StripTypeAliasDeclarations",
@@ -67,7 +73,7 @@ private val moveInnerClassesUpPhase = makeIrModulePhase(
 )
 
 private val propertiesLoweringPhase = makeIrModulePhase<DartBackendContext>(
-    { context -> PropertiesLowering(context) },
+    { context -> PropertiesLowering(context, generateAnnotationFields = true) },
     name = "PropertiesLowering",
     description = "Move fields and accessors out from its property"
 )
@@ -190,6 +196,7 @@ val dartPhases = namedIrModulePhase(
     description = "Lower Kotlin IR to make Dart compilation easier",
     lower = expectDeclarationsRemovingPhase then
             //addFakeConstructorToInterfacePhase then
+            annotationClassLoweringPhase then
             stripTypeAliasDeclarationsPhase then
             innerClassesLoweringPhase then
             innerClassConstructorCallsLoweringPhase then
