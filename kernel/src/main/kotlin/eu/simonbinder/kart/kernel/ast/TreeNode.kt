@@ -37,6 +37,10 @@ abstract class NamedNode(reference: Reference? = null) : TreeNode() {
     init {
         this.reference.node = this
     }
+
+    override fun toString(): String {
+        return "${this::class.simpleName}@$canonicalName"
+    }
 }
 
 interface HasAnnotations {

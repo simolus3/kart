@@ -313,7 +313,7 @@ class KernelReader(
             val flags = readByte().toInt()
             val name = readStringReference()
             val annotations = readExpressions()
-            readAndPushTypeParameters() // todo type parameters
+            val typeParameters = readAndPushTypeParameters()
             val superClass = readOption(this::readType)
             readOption(this::readType) // skip mixedInType
             val implementedClasses = readTypes().toMutableList()
@@ -324,6 +324,7 @@ class KernelReader(
                 it.fileEndOffset = endOffset
                 it.flags = flags
                 it.annotations += annotations
+                it.typeParameters += typeParameters
 
                 readList(this::readField).forEach { field -> it.members += field }
                 readList(this::readConstructor).forEach { constructor -> it.members += constructor }
@@ -760,5 +761,4 @@ class KernelReader(
             else -> TODO()
         }.also { initializer -> initializer.isSynthetic = isSynthetic }
     }
-
 }
