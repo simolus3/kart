@@ -203,6 +203,9 @@ object ExpressionCompiler : IrElementVisitor<Expression, InBodyCompilationContex
             val dartResult = branch.result.accept(this, data)
             val dartCondition = ConditionalExpression(dartBranch, dartResult, InvalidExpression("No else set"))
 
+            // THe static type is optional in Kernel, but dart2js won't work without it.
+            dartCondition.staticType = data.info.dartTypeFor(branch.result.type)
+
             when {
                 root == null -> {
                     root = dartCondition

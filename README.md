@@ -25,29 +25,32 @@ Finally, run `pub get` in the `kart_support` directory.
 
 You can now compile a set of test cases with `./gradlew integration_tests:generateTextDescription`.
 
-### Quickly compiling a file
+### Compiling and running a file
 
 Create a folder called `example` in this directory, then run `Main.kt` in `kotlin2kernel`, passing
 the stdlib location from the setup step as parameter. This will compile all Kotlin sources in
 `example` into `output.dill`, which can then be run in Dart.
 
+For some input files that work, see `integration_tests/cases/`.
+
+The generated Kernel files can be run similar to regular Dart files: 
+Just use `dart --null-safety output.dill`
+
 #### dart2js
 
-Note: At the moment our Kernel files crash dart2js for reasons I don't understand.
-
 To further compile a Kernel file to JavaScript with `dart2js`, a matching Dart platform needs to 
-be linked. To do that, run `dart kart_support/tool/link_stdlib.dart <file> js`. If you want to
+be linked. To do that, run `dart kart_support/tool/link_stdlib.dart <output.dill> js`. If you want to
 run the generated file in node, use `js-server` instead of `js` in the end.
 
-Finally, run `dart2js <file_linked.dill>`.
+Finally, run `dart2js <output_linked.dill>`.
 
 ### Viewing generated Dart
 
 To view a generated `.dill` file in text form, you can run 
 `dart kart_support/tool/kernel_to_text.dart < file.dill`.
-To run such file, just use `dart --null-safety file.dill`.
 
 ### Project structure
 
-For now, the project consists of two main modules: `kernel` is used to create `.dill` files in Kotlin.
+For now, the project consists of two main modules: 
+`kernel` is used to read, write and transform `.dill` files in Kotlin.
 `kotlin2kernel` is the main compiler, which transforms Kotlin IR to Kernel components.

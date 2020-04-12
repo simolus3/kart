@@ -16,6 +16,8 @@ class Source(
             }
         }
 
+        // add an additional line at the end, this is expected by dart2js
+        lineBreakPositions.add(chars.size + 1)
         return@lazy lineBreakPositions
     }
 

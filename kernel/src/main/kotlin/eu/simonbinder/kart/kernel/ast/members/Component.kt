@@ -7,7 +7,7 @@ import eu.simonbinder.kart.kernel.utils.children
 
 class Component(
     libraries: MutableList<Library>? = null,
-    val dartVersion: DartVersion = DartVersion.LATEST
+    val dartVersion: DartVersion = DartVersion.DEFAULT_FOR_OUTPUT
 ) : TreeNode() {
 
     val libraries = children(libraries)

@@ -291,7 +291,9 @@ class KernelSerializer(
 
     private fun writeIndex(node: Component) {
         // add padding so that the entire component is 8-byte aligned
-        val elementsInIndex = 7 + libraryOffsets.size + 2 // amount of writeUint32
+        val writeNnbdMode = node.dartVersion.kernelVersion >= 41
+
+        val elementsInIndex = (if (writeNnbdMode) 10 else 9) + libraryOffsets.size + 2 // amount of writeUint32
         val unalignedSize = currentOffset.toInt() + 4 * elementsInIndex
         val padding = 8 - (unalignedSize % 8)
         repeat(padding) {
@@ -305,7 +307,9 @@ class KernelSerializer(
         writeUint32(binaryOffsetForStringTable)
         writeUint32(binaryOffsetForConstantTable)
         writeUint32((nameIndexer[node.mainMethodReference?.canonicalName]).toUInt())
-        writeUint32(node.nonNullableByDefaultCompiledMode.ordinal.toUInt())
+        if (node.dartVersion.kernelVersion >= 41) {
+            writeUint32(node.nonNullableByDefaultCompiledMode.ordinal.toUInt())
+        }
         libraryOffsets.forEach(this::writeUint32)
         writeUint32(node.libraries.size.toUInt())
         val size = currentOffset - binaryOffsetForComponent + 4u // +4 because we're about to write a 4 byte integer

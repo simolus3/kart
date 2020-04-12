@@ -66,11 +66,11 @@ class ExtensionCallSiteLowering : BodyLoweringPass {
     override fun lower(irBody: IrBody) {
         irBody.transformChildrenVoid(object : IrElementTransformerVoid() {
             override fun visitCall(expression: IrCall): IrExpression {
-                val receiver = expression.extensionReceiver ?: return expression
+                val receiver = expression.extensionReceiver ?: return super.visitCall(expression)
 
                 expression.extensionReceiver = null
 
-                return IrCallImpl(
+                val transformed = IrCallImpl(
                     expression.startOffset,
                     expression.endOffset,
                     expression.type,
@@ -92,6 +92,8 @@ class ExtensionCallSiteLowering : BodyLoweringPass {
                         it.putTypeArgument(index, expression.getTypeArgument(index))
                     }
                 }
+
+                return super.visitCall(transformed)
             }
         })
     }

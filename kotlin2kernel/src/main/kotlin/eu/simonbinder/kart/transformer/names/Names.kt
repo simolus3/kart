@@ -50,7 +50,7 @@ class Names(private val backendContext: DartBackendContext) {
                         .getChild(if (declaration.isGetter) CanonicalName.GETTERS else CanonicalName.SETTERS)
                         .getChild(nameOfField)
                 } else {
-                    val functionName = changedUnqualifiedName ?: declaration.name.identifier
+                    val functionName = NameMangling.mangledNameFor(declaration)
                     baseName.getChild(CanonicalName.METHODS).getChild(functionName)
                 }
             }
