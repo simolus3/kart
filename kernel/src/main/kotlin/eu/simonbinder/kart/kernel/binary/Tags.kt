@@ -38,6 +38,8 @@ object Tags {
     const val NULL_LITERAL = 43u
     const val THIS = 46u
     const val THROW = 48u
+    const val LIST_LITERAL = 49u
+    const val CONST_LIST_LITERAL = 58u
     const val POSITIVE_INT_LITERAL = 55u
     const val NEGATIVE_INT_LITERAL = 56u
     const val BIG_INT_LITERAL = 57u
@@ -58,12 +60,16 @@ object Tags {
 
     const val VARIABLE_DECLARATION = 78u
 
+    const val TYPEDEF_TYPE = 87u
     const val BOTTOM_TYPE = 89u
     const val INVALID_TYPE = 90u
     const val DYNAMIC_TYPE = 91u
     const val VOID_TYPE = 92u
     const val INTERFACE_TYPE = 93u
+    const val FUNCTION_TYPE = 94u
+    const val TYPE_PARAMETER_TYPE = 95u
     const val SIMPLE_INTERFACE_TYPE = 96u
+    const val SIMPLE_FUNCTION_TYPE = 97u
     const val NEVER_TYPE = 98u
 
     const val SPECIALIZED_INT_LITERAL = 144u

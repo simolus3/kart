@@ -10,4 +10,7 @@ interface DartTypeVisitor<R> {
     fun visitDynamicType(node: DynamicType): R = defaultDartType(node)
     fun visitVoidType(node: VoidType): R = defaultDartType(node)
     fun visitNeverType(node: NeverType): R = defaultDartType(node)
+    fun visitFunctionType(node: FunctionType): R = defaultDartType(node)
+    fun visitTypedefType(node: TypedefType): R = defaultDartType(node)
+    fun visitTypeParameterType(node: TypeParameterType): R = defaultDartType(node)
 }

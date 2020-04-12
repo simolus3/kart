@@ -20,6 +20,8 @@ interface ExpressionVisitor<R> {
     fun visitBooleanLiteral(node: BooleanLiteral): R = defaultLiteral(node)
     fun visitNullLiteral(node: NullLiteral): R = defaultLiteral(node)
 
+    fun visitListLiteral(node: ListLiteral): R = defaultExpression(node)
+
     // Invocations
 
     fun visitStaticInvocation(node: StaticInvocation): R = defaultExpression(node)

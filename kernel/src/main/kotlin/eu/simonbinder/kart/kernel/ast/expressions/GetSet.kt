@@ -6,7 +6,7 @@ import eu.simonbinder.kart.kernel.ast.TreeVisitor
 import eu.simonbinder.kart.kernel.utils.child
 
 class StaticGet(
-    val reference: Reference
+    val reference: Reference?
 ) : Expression() {
 
     override fun <T> accept(visitor: TreeVisitor<T>): T {

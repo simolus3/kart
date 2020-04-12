@@ -580,6 +580,10 @@ class KernelReader(
                 val variable = variableStack[Tags.specializedPayload(tag).toInt()]
                 VariableSet(variable, readExpression()).also { it.fileOffset = fileOffset }
             }
+            Tags.STATIC_GET -> {
+                val offset = readFileOffset()
+                StaticGet(readReference()).also { it.fileOffset = offset }
+            }
             Tags.METHOD_INVOCATION -> {
                 val fileOffset = readFileOffset()
                 MethodInvocation(readExpression(), readName(), readArguments(), readReference()).also {
@@ -628,6 +632,13 @@ class KernelReader(
                 val fileOffset = readFileOffset()
                 Throw(readExpression()).also { it.fileOffset = fileOffset }
             }
+            Tags.LIST_LITERAL, Tags.CONST_LIST_LITERAL -> {
+                val fileOffset = readFileOffset()
+                ListLiteral(readType(), readExpressions()).also {
+                    it.fileOffset = fileOffset
+                    it.isConst = tag == Tags.CONST_LIST_LITERAL
+                }
+            }
             Tags.BLOCK_EXPRESSION -> BlockExpression(readStatements(), readExpression())
             else -> error("Unexpected expression tag: $tag")
         }
@@ -649,7 +660,18 @@ class KernelReader(
     }
 
     private fun readTypeParameter(): TypeParameter {
-        TODO()
+        val flags = readByte().toInt()
+        val annotations = readExpressions()
+        val variance = Variance.values()[readByte().toInt()]
+        val name = readStringReference()
+        val bound = readType()
+        val defaultType = readOption(this::readType)
+
+        return TypeParameter(name, bound, defaultType).also {
+            it.flags = flags
+            it.annotations += annotations
+            it.variance = variance
+        }
     }
 
     private fun readTypes(): List<DartType> = readList(this::readType)
@@ -661,7 +683,7 @@ class KernelReader(
 
         fun readTypes(): MutableList<DartType> = readList(this::readType).toMutableList()
 
-        return when (readByte()) {
+        return when (val tag = readByte()) {
             Tags.BOTTOM_TYPE -> BottomType
             Tags.NEVER_TYPE -> NeverType(readNullability())
             Tags.INVALID_TYPE -> InvalidType
@@ -669,8 +691,56 @@ class KernelReader(
             Tags.VOID_TYPE -> VoidType
             Tags.INTERFACE_TYPE -> InterfaceType(readNullability(), readReference(), readTypes())
             Tags.SIMPLE_INTERFACE_TYPE -> InterfaceType(readNullability(), readReference())
-            else -> TODO()
+            Tags.FUNCTION_TYPE -> {
+                val nullability = readNullability()
+                val typeParameters = readAndPushTypeParameters()
+                val requiredParameterCount = readUint().toInt()
+                readUint() // skip total parameter count
+                val positionalParameters = readTypes()
+                val namedParameters = readList(this::readNamedType)
+                val typedef = readOption { readType() as? TypedefType ?: error("Expected a typedef") }
+                val returnType = readType()
+
+                FunctionType(nullability).also {
+                    it.typeParameters += typeParameters
+                    it.requiredParameterCount = requiredParameterCount
+                    it.positionalParameters += positionalParameters
+                    it.namedParameters += namedParameters
+                    it.typedef = typedef
+                    it.returnType = returnType
+                }
+            }
+            Tags.SIMPLE_FUNCTION_TYPE -> {
+                val nullability = readNullability()
+                val positionalParameters = readTypes()
+                val returnType = readType()
+
+                FunctionType(nullability).also {
+                    it.positionalParameters += positionalParameters
+                    it.requiredParameterCount = positionalParameters.size
+                    it.returnType = returnType
+                }
+            }
+            Tags.TYPEDEF_TYPE -> {
+                val nullability = readNullability()
+                val reference = readReference()
+                val arguments = readTypes()
+
+                TypedefType(nullability, reference, arguments)
+            }
+            Tags.TYPE_PARAMETER_TYPE -> {
+                val nullability = readNullability()
+                val parameter = typeParameterStack[readUint().toInt()]
+                val bound = readOption(this::readType)
+
+                TypeParameterType(nullability, parameter, bound)
+            }
+            else -> TODO("Unknown type tag $tag")
         }
+    }
+
+    private fun readNamedType(): NamedDartType {
+        return NamedDartType(readStringReference(), readType()).also { it.flags = readByte().toInt() }
     }
 
     private fun readInitializer(): Initializer {
