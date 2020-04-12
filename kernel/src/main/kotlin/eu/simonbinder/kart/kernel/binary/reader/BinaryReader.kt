@@ -56,13 +56,13 @@ class KernelReader(
             byte and 0x80u == 0u -> byte // 0xxxxxxx
             byte and 0x40u == 0u -> {
                 // 10xxxxxx xxxxxxxx
-                return (byte and 0x3Fu) or readByte()
+                return ((byte and 0x3Fu) shl 8) or readByte()
             }
             else -> {
                 // 11xxxxxx xxxxxxxx
-                return (byte and 0x3Fu) or
-                        (readByte() shr 16) or
-                        (readByte() shr 8) or
+                return ((byte and 0x3Fu) shl 24) or
+                        (readByte() shl 16) or
+                        (readByte() shl 8) or
                         readByte()
             }
         }
@@ -167,10 +167,13 @@ class KernelReader(
             val libraryCount = readUint32()
             val componentFileSizeInBytes = readUint32()
 
+            val hasCompilationMode = currentKernelVersion >= 41
+            val numberOfFixedFields = if (hasCompilationMode) 10u else 9u
+
             val startOffset = offset - componentFileSizeInBytes
 
-            // go to start of ComponentIndex, which consists of (11 + libraryOffsets) int32 values
-            offset -= 4u * (11u + libraryCount)
+            // go to start of ComponentIndex
+            offset -= 4u * (numberOfFixedFields + 1u + libraryCount)
 
             indices.add(ComponentIndex(
                 startOffset = startOffset,
@@ -181,7 +184,7 @@ class KernelReader(
                 offsetForStringTable = readUint32(),
                 offsetForConstantTable = readUint32(),
                 mainMethodReference = readUint32(),
-                compilationMode = readUint32(),
+                compilationMode = if (hasCompilationMode) readUint32() else 0u,
                 libraryOffsets = UIntArray(libraryCount.toInt() + 1) { readUint32() }
             ))
 
@@ -587,9 +590,12 @@ class KernelReader(
                 val fileOffset = readFileOffset()
                 StaticInvocation(readReference()!!, readArguments()).also { it.fileOffset = fileOffset }
             }
-            Tags.CONSTRUCTOR_INVOCATION -> {
+            Tags.CONSTRUCTOR_INVOCATION, Tags.CONST_CONSTRUCTOR_INVOCATION -> {
                 val fileOffset = readFileOffset()
-                ConstructorInvocation(readReference(), readArguments()).also { it.fileOffset = fileOffset }
+                ConstructorInvocation(readReference(), readArguments()).also {
+                    it.fileOffset = fileOffset
+                    it.isConstant = tag == Tags.CONST_CONSTRUCTOR_INVOCATION
+                }
             }
             Tags.NOT -> Not(readExpression())
             Tags.NULL_CHECK -> {

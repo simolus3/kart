@@ -664,7 +664,7 @@ class KernelSerializer(
     }
 
     override fun visitConstructorInvocation(node: ConstructorInvocation) {
-        writeByte(Tags.CONSTRUCTOR_INVOCATION)
+        writeByte(if (node.isConstant) Tags.CONST_CONSTRUCTOR_INVOCATION else Tags.CONSTRUCTOR_INVOCATION)
         writeFileOffset(node.fileOffset)
         writeReference(node.reference)
         writeArguments(node.arguments)

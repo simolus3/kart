@@ -1,23 +1,24 @@
-import 'dart:io';
-
 import 'package:kart_support/read_input.dart';
 import 'package:kernel/kernel.dart';
-import 'package:kernel/text/ast_to_text.dart';
 
-/// Reads a [Component] from stdin and serializes it to text. If a parameter is
-/// passed, its parsed as an int and serves as a maximum file size (in bytes).
+/// Reads a Kernel file, removes all the body from function nodes and outputs
+/// that transformed Kernel file.
 Future<void> main(List<String> args) async {
   final bytes = await readWithArgs(args);
 
   final component = loadComponentFromBytes(bytes);
-  component.transformChildren(_RemoveSourceTransformer());
+  component.transformChildren(_RemoveBodiesTransformer());
 
-  final buffer = StringBuffer();
-  Printer(buffer).writeComponentFile(component);
-  stdout.write(buffer);
+  await writeComponentToBinary(component, 'stdout');
 }
 
-class _RemoveSourceTransformer extends Transformer {
+class _RemoveBodiesTransformer extends Transformer {
+  @override
+  TreeNode visitComponent(Component node) {
+    node.uriToSource.clear();
+    return node;
+  }
+
   @override
   TreeNode visitClass(Class node) {
     node.fileUri = null;
@@ -27,6 +28,7 @@ class _RemoveSourceTransformer extends Transformer {
   @override
   TreeNode visitField(Field node) {
     node.fileUri = null;
+    node.initializer = null;
     return super.visitField(node);
   }
 
@@ -34,6 +36,12 @@ class _RemoveSourceTransformer extends Transformer {
   TreeNode visitProcedure(Procedure node) {
     node.fileUri = null;
     return super.visitProcedure(node);
+  }
+
+  @override
+  TreeNode visitFunctionNode(FunctionNode node) {
+    node.body = null;
+    return super.visitFunctionNode(node);
   }
 
   @override

@@ -1,33 +1,8 @@
 import 'dart:io';
 
+import 'package:kart_support/dart_sdk.dart';
 import 'package:kernel/kernel.dart';
 import 'package:path/path.dart' as p;
-
-class DartPlatform {
-  final String dillName;
-
-  const DartPlatform(this.dillName);
-
-  static const dart2js = DartPlatform('dart2js_platform.dill');
-  static const dart2jsServer = DartPlatform('dart2js_server_platform.dill');
-  static const vm = DartPlatform('vm_platform_strong.dill');
-  static const vmProduct = DartPlatform('vm_platform_strong_product.dill');
-
-  static const byName = {
-    'js': dart2js,
-    'js-server': dart2jsServer,
-    'vm': vm,
-    'vm-product': vmProduct,
-  };
-
-  @override
-  String toString() {
-    final name = byName.keys
-        .firstWhere((key) => byName[key] == this, orElse: () => 'unknown name');
-
-    return 'DartPlatform: $name';
-  }
-}
 
 Future<void> main(List<String> args) async {
   if (args.isEmpty) {
@@ -53,7 +28,7 @@ Future<void> main(List<String> args) async {
   final fileContent = await file.readAsBytes();
 
   final stdlibComponent =
-      loadComponentFromBinary(_locatePlatformStdlib(platform));
+      loadComponentFromBinary(locatePlatformStdlib(platform));
 
   final compiledKotlin = loadComponentFromBytes(fileContent, stdlibComponent);
 
@@ -61,10 +36,4 @@ Future<void> main(List<String> args) async {
       p.relative('${p.basenameWithoutExtension(filePath)}_linked.dill');
   await writeComponentToBinary(compiledKotlin, output);
   print('Wrote linked Kernel file as $output');
-}
-
-String _locatePlatformStdlib(DartPlatform platform) {
-  final dartExec = Platform.resolvedExecutable;
-  final dartSdk = p.dirname(p.dirname(dartExec));
-  return p.join(dartSdk, 'lib', '_internal', platform.dillName);
 }

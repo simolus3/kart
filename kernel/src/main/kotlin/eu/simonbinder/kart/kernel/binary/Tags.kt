@@ -24,6 +24,7 @@ object Tags {
     const val METHOD_INVOCATION = 28u
     const val STATIC_INVOCATION = 30u
     const val CONSTRUCTOR_INVOCATION = 31u
+    const val CONST_CONSTRUCTOR_INVOCATION = 32u
     const val NOT = 33u
     const val LOGICAL_EXPRESSION = 34u
     const val CONDITIONAL_EXPRESSION = 35u

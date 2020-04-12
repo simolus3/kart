@@ -89,6 +89,7 @@ class ConstructorInvocation(
 ): Expression() {
 
     var arguments: Arguments by child(arguments)
+    var isConstant: Boolean = false
 
     override fun <T> accept(visitor: TreeVisitor<T>): T {
         return visitor.visitConstructorInvocation(this)
